@@ -1,0 +1,123 @@
+PACKAGE_NAME="ipset"
+PACKAGE_VERSION="#MODULE_VERSION#"
+AUTOINSTALL="YES"
+REMAKE_INITRD="NO"
+
+eval $(
+    if [ -z "${kernel_build_dir+x}" ]; then
+        kernel_build_dir="$kernel_source_dir"
+
+        t="/lib/modules/$kernelver"
+        if [ -z "${kernel_source_dir##$t/build}" ]; then
+            t="$t/source"
+            if [ -d "$t" ]; then
+                echo "kernel_source_dir='$t'"
+            fi
+        fi
+
+        echo "kernel_build_dir='$kernel_build_dir'"
+    fi
+)
+
+MAKE[0]=": \
+    && ./autogen.sh \
+    && ./configure \
+        --with-kbuild='$kernel_build_dir' \
+        --with-ksource='$kernel_source_dir' \
+    && make modules \
+"
+
+# xt_set
+BUILT_MODULE_LOCATION[0]="kernel/net/netfilter/"
+BUILT_MODULE_NAME[0]="xt_set"
+DEST_MODULE_LOCATION[0]="/updates/dkms"
+
+# em_ipset
+BUILT_MODULE_LOCATION[1]="kernel/net/sched/"
+BUILT_MODULE_NAME[1]="em_ipset"
+DEST_MODULE_LOCATION[1]="/updates/dkms"
+
+# ip_set_bitmap_ip
+BUILT_MODULE_LOCATION[2]="kernel/net/netfilter/ipset/"
+BUILT_MODULE_NAME[2]="ip_set_bitmap_ip"
+DEST_MODULE_LOCATION[2]="/updates/dkms"
+
+# ip_set_bitmap_ipmac
+BUILT_MODULE_LOCATION[3]="kernel/net/netfilter/ipset/"
+BUILT_MODULE_NAME[3]="ip_set_bitmap_ipmac"
+DEST_MODULE_LOCATION[3]="/updates/dkms"
+
+# ip_set_bitmap_port
+BUILT_MODULE_LOCATION[4]="kernel/net/netfilter/ipset/"
+BUILT_MODULE_NAME[4]="ip_set_bitmap_port"
+DEST_MODULE_LOCATION[4]="/updates/dkms"
+
+# ip_set_hash_ip
+BUILT_MODULE_LOCATION[5]="kernel/net/netfilter/ipset/"
+BUILT_MODULE_NAME[5]="ip_set_hash_ip"
+DEST_MODULE_LOCATION[5]="/updates/dkms"
+
+# ip_set_hash_ipmac
+BUILT_MODULE_LOCATION[6]="kernel/net/netfilter/ipset/"
+BUILT_MODULE_NAME[6]="ip_set_hash_ipmac"
+DEST_MODULE_LOCATION[6]="/updates/dkms"
+
+# ip_set_hash_ipmark
+BUILT_MODULE_LOCATION[7]="kernel/net/netfilter/ipset/"
+BUILT_MODULE_NAME[7]="ip_set_hash_ipmark"
+DEST_MODULE_LOCATION[7]="/updates/dkms"
+
+# ip_set_hash_ipportip
+BUILT_MODULE_LOCATION[8]="kernel/net/netfilter/ipset/"
+BUILT_MODULE_NAME[8]="ip_set_hash_ipportip"
+DEST_MODULE_LOCATION[8]="/updates/dkms"
+
+# ip_set_hash_ipport
+BUILT_MODULE_LOCATION[9]="kernel/net/netfilter/ipset/"
+BUILT_MODULE_NAME[9]="ip_set_hash_ipport"
+DEST_MODULE_LOCATION[9]="/updates/dkms"
+
+# ip_set_hash_ipportnet
+BUILT_MODULE_LOCATION[10]="kernel/net/netfilter/ipset/"
+BUILT_MODULE_NAME[10]="ip_set_hash_ipportnet"
+DEST_MODULE_LOCATION[10]="/updates/dkms"
+
+# ip_set_hash_mac
+BUILT_MODULE_LOCATION[11]="kernel/net/netfilter/ipset/"
+BUILT_MODULE_NAME[11]="ip_set_hash_mac"
+DEST_MODULE_LOCATION[11]="/updates/dkms"
+
+# ip_set_hash_netiface
+BUILT_MODULE_LOCATION[12]="kernel/net/netfilter/ipset/"
+BUILT_MODULE_NAME[12]="ip_set_hash_netiface"
+DEST_MODULE_LOCATION[12]="/updates/dkms"
+
+# ip_set_hash_net
+BUILT_MODULE_LOCATION[13]="kernel/net/netfilter/ipset/"
+BUILT_MODULE_NAME[13]="ip_set_hash_net"
+DEST_MODULE_LOCATION[13]="/updates/dkms"
+
+# ip_set_hash_netnet
+BUILT_MODULE_LOCATION[14]="kernel/net/netfilter/ipset/"
+BUILT_MODULE_NAME[14]="ip_set_hash_netnet"
+DEST_MODULE_LOCATION[14]="/updates/dkms"
+
+# ip_set_hash_netport
+BUILT_MODULE_LOCATION[15]="kernel/net/netfilter/ipset/"
+BUILT_MODULE_NAME[15]="ip_set_hash_netport"
+DEST_MODULE_LOCATION[15]="/updates/dkms"
+
+# ip_set_hash_netportnet
+BUILT_MODULE_LOCATION[16]="kernel/net/netfilter/ipset/"
+BUILT_MODULE_NAME[16]="ip_set_hash_netportnet"
+DEST_MODULE_LOCATION[16]="/updates/dkms"
+
+# ip_set
+BUILT_MODULE_LOCATION[17]="kernel/net/netfilter/ipset/"
+BUILT_MODULE_NAME[17]="ip_set"
+DEST_MODULE_LOCATION[17]="/updates/dkms"
+
+# ip_set_list_set
+BUILT_MODULE_LOCATION[18]="kernel/net/netfilter/ipset/"
+BUILT_MODULE_NAME[18]="ip_set_list_set"
+DEST_MODULE_LOCATION[18]="/updates/dkms"

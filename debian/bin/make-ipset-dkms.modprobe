@@ -1,0 +1,12 @@
+#!/bin/bash
+
+THIS_SCRIPT="${BASH_SOURCE[0]}"
+THIS_DIR="${THIS_SCRIPT%/*}"
+
+. ${THIS_DIR}/../ipset-dkms.dkms
+
+printf -- '# Adjust module options below (e.g. supply parameters).\n\n'
+
+for m in "${BUILT_MODULE_NAME[@]}"; do
+	printf -- '#options %-22s ...\n' "$m"
+done

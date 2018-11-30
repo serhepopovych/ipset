@@ -33,3 +33,23 @@ kernel/include/linux/netfilter/ipset/ip_set_compiler.h
 /stamp-h1
 
 /libltdl/
+
+/debian/*
+
+!/debian/bin/
+!/debian/patches/
+!/debian/source/
+
+!/debian/changelog
+!/debian/compat
+!/debian/control
+!/debian/copyright
+!/debian/gbp.conf
+!/debian/*-dkms.conf
+!/debian/*-dkms.dkms
+!/debian/*-dkms.docs
+!/debian/*-dkms.install
+!/debian/*-dkms.manpages
+!/debian/*-dkms.modprobe
+!/debian/rules
+!/debian/watch
