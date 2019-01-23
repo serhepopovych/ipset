@@ -2,10 +2,20 @@
 
 #export DH_VERBOSE=1
 
+export DEB_BUILD_MAINT_OPTIONS=hardening=+all
+
+_configure := --sbindir=/sbin --libdir=/lib/$(DEB_HOST_MULTIARCH) \
+	--with-kmod=no --enable-settype-modules --disable-silent-rules
+
+CFLAGS += -fstack-protector-all
+
 VERSION	:= $(shell dpkg-parsechangelog | sed -nr '/^Version:/s/Version: (.*:)?(.*)-(.*)/\2/p')
 
 %:
-	dh $@ --with dkms,quilt
+	dh $@ --with autoreconf,dkms,quilt
+
+override_dh_auto_configure:
+	dh_auto_configure -- $(_configure)
 
 override_dh_install:
 	dh_install COPYING Make_global.am Makefile.am README autogen.sh configure.ac m4 \
@@ -15,8 +25,24 @@ override_dh_install:
 	chmod a+rx debian/ipset-dkms/usr/src/ipset-$(VERSION)/autogen.sh
 	rm -f debian/ipset-dkms/usr/src/ipset-$(VERSION)/m4/.gitignore
 
+PKGCONFIG_INSTDIR := debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/pkgconfig
+BASHCOMPL_INSTDIR := debian/tmp/usr/share/bash-completion/completions
+override_dh_auto_install:
+	mkdir -p $(PKGCONFIG_INSTDIR)
+	cp lib/libipset.pc $(PKGCONFIG_INSTDIR)
+	mkdir -p $(BASHCOMPL_INSTDIR)
+	install --mode=0755 utils/ipset_bash_completion/ipset $(BASHCOMPL_INSTDIR)/ipset
+	dh_auto_install
+
 override_dh_dkms:
 	dh_dkms -V $(VERSION)
 
+override_dh_link:
+	LIBIPSET_SO_VER=$(shell basename $(CURDIR)/debian/tmp/lib/*/libipset.so.*.* | sed 's/.*\.so\.\(.*\)/\1/') \
+	dh_link
+
+override_dh_makeshlibs:
+	dh_makeshlibs -V
+
 # do nothing
-override_dh_auto_configure override_dh_auto_build override_dh_auto_test override_dh_auto_install override_dh_auto_clean:
+override_dh_auto_test:

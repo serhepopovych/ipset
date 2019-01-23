@@ -1,3 +1,14 @@
+ipset (7.1-2) unstable; urgency=low
+
+  * Build userspace library, development and administration tool packages.
+  * Based on Debian's ipset (6.38-1) package.
+  * Change library package name to match sonames
+    * Change libipset11 to libipset13 to match sonames
+    * debian/libipset13.symbols: Update new symbols
+  * Update Vcs-{Browser,Git} with github.com/serhepopovych.
+
+ -- Serhey Popovych <serhe.popovych@gmail.com>  Wed, 23 Jan 2019 16:30:28 +0200
+
 ipset (7.1-1) unstable; urgency=low
 
   * Initial release. (Closes: #123456)
