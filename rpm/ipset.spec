@@ -1,8 +1,3 @@
-%define module_name ipset
-%define module_version 7.1
-
-%define _srcdir %{_prefix}/src/%{module_name}-%{module_version}
-%define _dkmsdir %{_prefix}/lib/dkms
 
 %define _topdir %(pwd)
 %define _specdir %{_topdir}/rpm
@@ -12,23 +7,94 @@
 %define _rpmdir %{_topdir}/..
 %define _srcrpmdir %{_topdir}/..
 
-%define __find_provides  %{_dkmsdir}/find-provides
-
-Summary:	DKMS source for ipset kernel part
-Name:		%{module_name}-dkms
-Version:	%{module_version}
+Summary:	Manage Linux IP sets
+Name:		ipset
+Version:	7.21
 License:	GPLv2
+Group:		System Environment/Base
 URL:		https://github.com/serhepopovych/ipset
 Packager:	Serhey Popovych <serhe.popovych@gmail.com>
 Release:	1%{?dist}
-BuildArch:	noarch
-Group:		System/Kernel
-Requires:	dkms >= 1.95
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root/
 
-Requires:	automake, autoconf, pkgconfig, libtool, make, libtool-ltdl-devel, libmnl-devel, kernel-devel
+BuildRequires:	automake autoconf pkgconfig libtool make libtool-ltdl-devel libmnl-devel
+
+# An explicit requirement is needed here, to avoid cases where a user would
+# explicitly update only one of the two (e.g 'yum update ipset')
+Requires:	%{name}-libs%{?_isa} = %{version}-%{release}
+
+%define _srcdir %{_prefix}/src/%{name}-%{version}
+%define _dkmsdir %{_prefix}/lib/dkms
+%define __find_provides  %{_dkmsdir}/find-provides
 
 %description
+IP sets are a framework inside the Linux 2.4.x and 2.6.x kernel which can be
+administered by the ipset(8) utility. Depending on the type, currently an
+IP set may store IP addresses, (TCP/UDP) port numbers or IP addresses with
+MAC addresses in a way  which ensures lightning speed when matching an
+entry against a set.
+
+If you want to
+
+ * store multiple IP addresses or port numbers and match against the
+   entire collection using a single iptables rule.
+ * dynamically update iptables rules against IP addresses or ports without
+   performance penalty.
+ * express complex IP address and ports based rulesets with a single
+   iptables rule and benefit from the speed of IP sets.
+
+then IP sets may be the proper tool for you.
+
+%package libs
+Summary:	Shared library providing the IP sets functionality
+
+%description libs
+IP sets are a framework inside the Linux 2.4.x and 2.6.x kernel which can be
+administered by the ipset(8) utility. Depending on the type, currently an
+IP set may store IP addresses, (TCP/UDP) port numbers or IP addresses with
+MAC addresses in a way  which ensures lightning speed when matching an
+entry against a set.
+
+If you want to
+
+ * store multiple IP addresses or port numbers and match against the
+   entire collection using a single iptables rule.
+ * dynamically update iptables rules against IP addresses or ports without
+   performance penalty.
+ * express complex IP address and ports based rulesets with a single
+   iptables rule and benefit from the speed of IP sets.
+
+then IP sets may be the proper tool for you.
+
+%package devel
+Summary:	Development files for %{name}
+Requires:	%{name}-libs%{?_isa} == %{version}-%{release}
+Requires:	kernel-devel
+
+%description devel
+IP sets are a framework inside the Linux 2.4.x and 2.6.x kernel which can be
+administered by the ipset(8) utility. Depending on the type, currently an
+IP set may store IP addresses, (TCP/UDP) port numbers or IP addresses with
+MAC addresses in a way  which ensures lightning speed when matching an
+entry against a set.
+
+If you want to
+
+ * store multiple IP addresses or port numbers and match against the
+   entire collection using a single iptables rule.
+ * dynamically update iptables rules against IP addresses or ports without
+   performance penalty.
+ * express complex IP address and ports based rulesets with a single
+   iptables rule and benefit from the speed of IP sets.
+
+then IP sets may be the proper tool for you.
+
+%package dkms
+Summary:	DKMS source for ipset kernel part
+Requires:	dkms >= 1.95
+Requires:	automake, autoconf, pkgconfig, libtool, make, libtool-ltdl-devel, libmnl-devel, kernel-devel
+
+%description dkms
 IP sets are a framework inside the Linux 2.4.x and 2.6.x kernel which can be
 administered by the ipset(8) utility. Depending on the type, currently an
 IP set may store IP addresses, (TCP/UDP) port numbers or IP addresses with
@@ -51,9 +117,24 @@ if [ "$RPM_BUILD_ROOT" != "/" ]; then
 	rm -rf $RPM_BUILD_ROOT
 fi
 
+%build
+autoreconf -fi
+%configure --enable-static=no --with-kmod=no
+
+# Prevent libtool from defining rpath
+sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
+sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
+
+make %{?_smp_mflags}
+
 %install
+## ipset tools, libs and devel
+make install DESTDIR=$RPM_BUILD_ROOT
+find $RPM_BUILD_ROOT -name '*.la' -exec rm -f '{}' \;
+
+## dkms
 mkdir -p $RPM_BUILD_ROOT/%{_srcdir}
-mkdir -p $RPM_BUILD_ROOT/%{_datadir}/%{name}
+mkdir -p $RPM_BUILD_ROOT/%{_datadir}/%{name}-dkms
 mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/depmod.d
 mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/modprobe.d
 
@@ -66,18 +147,18 @@ for f in %{_sourcedir}/COPYING %{_sourcedir}/README \
 done
 
 sed -e "s|updates/dkms|extra|g" \
-    -e "s|#MODULE_NAME#|%{module_name}|g" \
-    -e "s|#MODULE_VERSION#|%{module_version}|g" \
+    -e "s|#MODULE_NAME#|%{name}|g" \
+    -e "s|#MODULE_VERSION#|%{version}|g" \
     %{_sourcedir}/dkms/conf > $RPM_BUILD_ROOT/%{_srcdir}/dkms.conf
 
 sed -e "s|updates/dkms|extra|g" \
-    %{_sourcedir}/dkms/depmod > $RPM_BUILD_ROOT/%{_sysconfdir}/depmod.d/%{name}.conf
+    %{_sourcedir}/dkms/depmod > $RPM_BUILD_ROOT/%{_sysconfdir}/depmod.d/%{name}-dkms.conf
 
 sed -e "s|updates/dkms|extra|g" \
-    %{_sourcedir}/dkms/modprobe > $RPM_BUILD_ROOT/%{_sysconfdir}/modprobe.d/%{name}.conf
+    %{_sourcedir}/dkms/modprobe > $RPM_BUILD_ROOT/%{_sysconfdir}/modprobe.d/%{name}-dkms.conf
 
 if [ -f %{_sourcedir}/common.postinst ]; then
-	install -m 755 %{_sourcedir}/common.postinst $RPM_BUILD_ROOT/%{_datadir}/%{name}/postinst
+	install -m 755 %{_sourcedir}/common.postinst $RPM_BUILD_ROOT/%{_datadir}/%{name}-dkms/postinst
 fi
 
 %clean
@@ -85,34 +166,71 @@ if [ "$RPM_BUILD_ROOT" != "/" ]; then
 	rm -rf $RPM_BUILD_ROOT
 fi
 
-%post
-for POSTINST in %{_dkmsdir}/common.postinst %{_datadir}/%{name}/postinst; do
+%preun
+if [[ $1 -eq 0 && -n $(lsmod | grep "^xt_set ") ]]; then
+    rmmod xt_set 2>/dev/null
+    [[ $? -ne 0 ]] && echo Current iptables configuration requires ipsets && exit 1
+fi
+
+%files
+%doc COPYING ChangeLog
+%doc %{_mandir}/man8/%{name}.8.gz
+%doc %{_mandir}/man8/%{name}-translate.8.gz
+%{_sbindir}/%{name}
+%{_sbindir}/%{name}-translate
+
+%post libs -p /sbin/ldconfig
+
+%postun libs -p /sbin/ldconfig
+
+%files libs
+%doc COPYING
+%{_libdir}/lib%{name}.so.*
+
+%files devel
+%doc %{_mandir}/man3/lib%{name}.3.gz
+%{_includedir}/lib%{name}
+%{_libdir}/lib%{name}.so
+%{_libdir}/pkgconfig/lib%{name}.pc
+
+%post dkms
+for POSTINST in %{_dkmsdir}/common.postinst %{_datadir}/%{name}-dkms/postinst; do
 	if [ -f $POSTINST ]; then
-		$POSTINST %{module_name} %{module_version} %{_datadir}/%{name}
+		$POSTINST %{name} %{version} %{_datadir}/%{name}-dkms
 		exit $?
 	fi
 	echo "WARNING: $POSTINST does not exist."
 done
-echo -e "ERROR: DKMS version is too old and %{name} was not"
+echo -e "ERROR: DKMS version is too old and %{name}-dkms was not"
 echo -e "built with legacy DKMS support."
-echo -e "You must either rebuild %{name} with legacy postinst"
+echo -e "You must either rebuild %{name}-dkms with legacy postinst"
 echo -e "support or upgrade DKMS to a more current version."
 exit 1
 
-%preun
+%preun dkms
 echo -e
-echo -e "Uninstall of %{module_name} module (version %{module_version}) beginning:"
-dkms remove -m %{module_name} -v %{module_version} --all --rpm_safe_upgrade
+echo -e "Uninstall of %{name} module (version %{version}) beginning:"
+dkms remove -m %{name} -v %{version} --all --rpm_safe_upgrade
 exit 0
 
-%files
+%files dkms
 %defattr(-,root,root)
-%config(noreplace) %{_sysconfdir}/depmod.d/%{name}.conf
-%config(noreplace) %{_sysconfdir}/modprobe.d/%{name}.conf
+%config(noreplace) %{_sysconfdir}/depmod.d/%{name}-dkms.conf
+%config(noreplace) %{_sysconfdir}/modprobe.d/%{name}-dkms.conf
 %{_srcdir}
-%{_datadir}/%{name}
+%{_datadir}/%{name}-dkms
 %doc README
 
+%files services
+%{_unitdir}/%{name}.service
+%attr(0755,root,root) %{_sysconfdir}/init.d/%{name}
+%config(noreplace) %attr(0644,root,root) %{_sysconfdir}/sysconfig/%{name}-config
+%dir %{_legacy_actions}/%{name}
+%{_legacy_actions}/%{name}/save
+%{_legacy_actions}/%{name}/flush
+%dir %{_sysconfdir}/%{name}
+%ghost %config(noreplace) %attr(0600,root,root) %{_sysconfdir}/%{name}/%{name}
+
 %changelog
-* Wed Jan 23 2019 Serhey Popovych <serhe.popovych@gmail.com> - 7.1-1
+* %(date "+%a %b %d %Y") %{packager} %{version}-%{release}
 - Initial release. (Closes: #123456)
