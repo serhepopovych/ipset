@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -e
+
+# Cleanup obsoleted bash completion configuration file
+if [ -f /etc/bash_completion.d/ipset ]; then
+  rm -f /etc/bash_completion.d/ipset
+fi
+
+#DEBHELPER#
+
+exit 0

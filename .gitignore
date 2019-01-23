@@ -51,5 +51,14 @@ kernel/include/linux/netfilter/ipset/ip_set_compiler.h
 !/debian/*-dkms.install
 !/debian/*-dkms.manpages
 !/debian/*-dkms.modprobe
+!/debian/ipset.docs
+!/debian/ipset.install
+!/debian/ipset.manpages
+!/debian/ipset.postinst
+!/debian/libipset-dev.install
+!/debian/libipset-dev.links
+!/debian/libipset13.install
+!/debian/libipset13.symbols
+!/debian/lintian-overrides
 !/debian/rules
 !/debian/watch

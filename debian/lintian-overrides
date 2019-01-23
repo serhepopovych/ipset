@@ -1,0 +1,2 @@
+# false-positives, the script using "extglob"
+ipset: shell-script-fails-syntax-check usr/share/bash-completion/completions/ipset

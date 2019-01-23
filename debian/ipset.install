@@ -1,0 +1,3 @@
+usr/share/bash-completion/completions/*
+sbin/ipset
+sbin/ipset-translate

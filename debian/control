@@ -1,10 +1,17 @@
 Source: ipset
-Section: kernel
+Section: net
 Priority: extra
 Maintainer: Serhey Popovych <serhe.popovych@gmail.com>
 Build-Depends:
  dkms,
- debhelper (>= 9.20120115~)
+ debhelper (>= 9.20120115~),
+ dh-exec (>= 0.3),
+ dh-autoreconf (>= 7),
+ quilt (>= 0.60),
+ dpkg-dev (>= 1.16.1~),
+ libltdl-dev,
+ libmnl-dev,
+ pkg-config
 Standards-Version: 3.8.1
 Homepage: http://ipset.netfilter.org
 Vcs-Git: https://github.com/serhepopovych/ipset.git
@@ -30,3 +37,79 @@ Description: dkms source for ipset kernel part
     iptables rule and benefit from the speed of IP sets.
  .
  then IP sets may be the proper tool for you.
+
+Package: ipset
+Architecture: linux-any
+Depends: iptables, ${misc:Depends}, ${shlibs:Depends}
+Provides: ipset-${source:Upstream-Version}
+Breaks: xtables-addons-common (<< 1.41~)
+Description: administration tool for kernel IP sets
+ IP sets are a framework inside the Linux 2.4.x and 2.6.x kernel which can be
+ administered by the ipset(8) utility. Depending on the type, currently an
+ IP set may store IP addresses, (TCP/UDP) port numbers or IP addresses with
+ MAC addresses in a  way which ensures lightning speed when matching an
+ entry against a set.
+ .
+ If you want to
+ .
+  * store multiple IP addresses or port numbers and match against the
+    entire collection using a single iptables rule.
+  * dynamically update iptables rules against IP addresses or ports without
+    performance penalty.
+  * express complex IP address and ports based rulesets with a single
+    iptables rule and benefit from the speed of IP sets.
+ .
+ then IP sets may be the proper tool for you.
+
+Package: libipset-dev
+Section: libdevel
+Architecture: linux-any
+Multi-Arch: same
+Depends: libipset13 (= ${binary:Version}), libmnl-dev, ${misc:Depends}
+Description: development files for IP sets
+ IP sets are a framework inside the Linux 2.4.x and 2.6.x kernel which can be
+ administered by the ipset(8) utility. Depending on the type, currently an
+ IP set may store IP addresses, (TCP/UDP) port numbers or IP addresses with
+ MAC addresses in a  way which ensures lightning speed when matching an
+ entry against a set.
+ .
+ If you want to
+ .
+  * store multiple IP addresses or port numbers and match against the
+    entire collection using a single iptables rule.
+  * dynamically update iptables rules against IP addresses or ports without
+    performance penalty.
+  * express complex IP address and ports based rulesets with a single
+    iptables rule and benefit from the speed of IP sets.
+ .
+ then IP sets may be the proper tool for you.
+ .
+ This package contains the development libraries and header files you need to
+ develop your programs using the IP sets library.
+
+Package: libipset13
+Section: libs
+Architecture: linux-any
+Multi-Arch: same
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Pre-Depends: ${misc:Pre-Depends}
+Description: library for IP sets
+ IP sets are a framework inside the Linux 2.4.x and 2.6.x kernel which can be
+ administered by the ipset(8) utility. Depending on the type, currently an
+ IP set may store IP addresses, (TCP/UDP) port numbers or IP addresses with
+ MAC addresses in a  way which ensures lightning speed when matching an
+ entry against a set.
+ .
+ If you want to
+ .
+  * store multiple IP addresses or port numbers and match against the
+    entire collection using a single iptables rule.
+  * dynamically update iptables rules against IP addresses or ports without
+    performance penalty.
+  * express complex IP address and ports based rulesets with a single
+    iptables rule and benefit from the speed of IP sets.
+ .
+ then IP sets may be the proper tool for you.
+ .
+ This package contains the shared libraries needed to run programs that use
+ the IP sets library.
