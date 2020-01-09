@@ -1,3 +1,13 @@
+7.5
+  - configure.ac: Support building with old autoconf 2.63
+    (Serhey Popovych)
+  - configure.ac: Build on kernels without skb->vlan_proto correctly
+    (Serhey Popovych)
+  - configure.ac: Add cond_resched_rcu() checks (Serhey Popovych)
+  - configure.ac: Better match for ipv6_skip_exthdr() frag_offp
+    arg presence (Serhey Popovych)
+  - Document explicitly that protocol is not stored in bitmap:port
+
 7.4
   - Fix compatibility support for netlink extended ACK and add
     synchronize_rcu_bh() checking

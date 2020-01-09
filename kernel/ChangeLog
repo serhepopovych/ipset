@@ -1,3 +1,14 @@
+7.5
+  - netfilter: ipset: avoid null deref when IPSET_ATTR_LINENO is present
+    (Florian Westphal)
+  - ip_set: Pass init_net when @net is missing in match check params
+    data structure (Serhey Popovych)
+  - netfilter: xt_set: Do not restrict --map-set to the mangle table
+    (Serhey Popovych)
+  - compat: em_ipset: Build on old kernels (Serhey Popovych)
+  - compat: Use skb_vlan_tag_present() instead of vlan_tx_tag_present()
+    (Serhey Popovych)
+
 7.4
   - Fix nla_policies to fully support NL_VALIDATE_STRICT
   - treewide: Replace GPLv2 boilerplate/reference with SPDX - rule 500
