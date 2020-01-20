@@ -429,6 +429,26 @@ else
 	AC_SUBST(HAVE_KVFREE, undef)
 fi
 
+AC_MSG_CHECKING([kernel source for bitmap_zalloc])
+if test -f $ksourcedir/include/linux/bitmap.h && \
+   $GREP -q 'bitmap_zalloc' $ksourcedir/include/linux/bitmap.h; then
+	AC_MSG_RESULT(yes)
+	AC_SUBST(HAVE_BITMAP_ZALLOC, define)
+else
+	AC_MSG_RESULT(no)
+	AC_SUBST(HAVE_BITMAP_ZALLOC, undef)
+fi
+
+AC_MSG_CHECKING([kernel source for bitmap_zero])
+if test -f $ksourcedir/include/linux/bitmap.h && \
+   $GREP -q 'bitmap_zero' $ksourcedir/include/linux/bitmap.h; then
+	AC_MSG_RESULT(yes)
+	AC_SUBST(HAVE_BITMAP_ZERO, define)
+else
+	AC_MSG_RESULT(no)
+	AC_SUBST(HAVE_BITMAP_ZERO, undef)
+fi
+
 AC_MSG_CHECKING([kernel source for struct net in struct xt_mtchk_param])
 if test -f $ksourcedir/include/linux/netfilter/x_tables.h && \
    $AWK '/^struct xt_mtchk_param /,/^}/' $ksourcedir/include/linux/netfilter/x_tables.h | \
