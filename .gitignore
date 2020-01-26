@@ -1,4 +1,5 @@
 *~
+*.orig
 *.la
 *.lo
 *.o
@@ -13,6 +14,8 @@ Makefile.in
 *.ko.cmd
 *.mod.c
 *.mod.o.cmd
+*.mod.cmd
+*.mod
 .tmp_versions
 Module.symvers
 modules.order
