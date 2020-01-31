@@ -4,7 +4,7 @@
 
 #include <linux/skbuff.h>
 #include <linux/types.h>
-#include <uapi/linux/in.h>
+#include <linux/in.h>
 
 extern bool ip_set_get_ip4_port(const struct sk_buff *skb, bool src,
 				__be16 *port, u8 *proto);
