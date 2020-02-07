@@ -125,11 +125,21 @@ counter)
 	./sendip.sh -p ipv4 -id 10.255.255.254 -is 10.255.255.64 -p udp -ud 80 -us 1025 10.255.255.254 >/dev/null 2>&1
 	./sendip.sh -p ipv4 -id 10.255.255.254 -is 10.255.255.64 -p udp -ud 80 -us 1025 10.255.255.254 >/dev/null 2>&1
 	;;
+resize)
+	$ipset n test hash:ip hashsize 4096 maxelem 655360 2>/dev/null
+	$cmd -t raw -A OUTPUT -j SET --add-set test src
+	$cmd -t raw -A OUTPUT -s 10.255.0.0/16 -j DROP
+	$cmd -t raw -A OUTPUT -s 10.254.0.0/16 -j DROP
+	./resize_sendip.sh &
+	$ipset restore < resize_target.set
+	;;
 stop)
 	$cmd -F
 	$cmd -X
 	$cmd -F -t mangle
 	$cmd -X -t mangle
+	$cmd -F -t raw
+	$cmd -X -t raw
 	$ipset -F 2>/dev/null
 	$ipset -X 2>/dev/null
 	;;
