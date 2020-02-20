@@ -52,7 +52,7 @@ struct bitmap_ipmac {
 #ifdef HAVE_TIMER_SETUP
 	struct ip_set *set;	/* attached to this ip_set */
 #endif
-	unsigned char extensions[0]	/* MAC + data extensions */
+	unsigned char extensions[]	/* MAC + data extensions */
 		__aligned(__alignof__(u64));
 };
 

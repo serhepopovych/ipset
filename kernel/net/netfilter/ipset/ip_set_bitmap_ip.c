@@ -48,7 +48,7 @@ struct bitmap_ip {
 #ifdef HAVE_TIMER_SETUP
 	struct ip_set *set;	/* attached to this ip_set */
 #endif
-	unsigned char extensions[0]	/* data extensions */
+	unsigned char extensions[]	/* data extensions */
 		__aligned(__alignof__(u64));
 };
 
