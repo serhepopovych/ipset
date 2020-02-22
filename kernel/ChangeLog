@@ -1,3 +1,13 @@
+7.6
+  - netfilter: ipset: Fix forceadd evaluation path
+  - netfilter: ipset: Correct the reported memory size
+  - ip_set: Include kernel header instead of UAPI (Serhey Popovych)
+  - netfilter: ipset: Fix "INFO: rcu detected stall in hash_xxx" reports
+  - netfilter: ipset: fix suspicious RCU usage in find_set_and_id
+  - Add compatibility support for bitmap_zalloc() and bitmap_zero()
+  - netfilter: ipset: use bitmap infrastructure completely
+  - netfilter: fix a use-after-free in mtype_destroy() (Cong Wang)
+
 7.5
   - netfilter: ipset: avoid null deref when IPSET_ATTR_LINENO is present
     (Florian Westphal)

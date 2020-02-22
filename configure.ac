@@ -1,5 +1,5 @@
 dnl Boilerplate
-AC_INIT([ipset], [7.5], [kadlec@netfilter.org])
+AC_INIT([ipset], [7.6], [kadlec@netfilter.org])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CANONICAL_HOST
 AC_CONFIG_MACRO_DIR([m4])
@@ -206,6 +206,16 @@ AC_CHECK_FUNCS(gethostbyname2)
 if test "$BUILDKMOD" == "yes"
 then
 dnl Check kernel incompatibilities... Ugly like hell
+
+AC_MSG_CHECKING([kernel source for system_power_efficient_wq])
+if test -f $ksourcedir/include/linux/workqueue.h && \
+   $GREP -q 'system_power_efficient_wq' $ksourcedir/include/linux/workqueue.h; then
+	AC_MSG_RESULT(yes)
+else
+	AC_MSG_RESULT(no)
+	AC_MSG_ERROR([Kernel source tree is too old, at least v3.11 is required])
+fi
+
 AC_MSG_CHECKING([kernel source for struct xt_action_param])
 if test -f $ksourcedir/include/linux/netfilter/x_tables.h && \
    $GREP -q 'struct xt_action_param' $ksourcedir/include/linux/netfilter/x_tables.h; then

@@ -1,3 +1,7 @@
+7.6
+  - Add checking system_power_efficient_wq in the kernel source tree
+  - .gitignore: add temporary files to the list
+
 7.5
   - configure.ac: Support building with old autoconf 2.63
     (Serhey Popovych)
