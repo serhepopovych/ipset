@@ -1,3 +1,33 @@
+ipset (7.6-1) unstable; urgency=low
+
+  * New upstream version 7.6.
+
+ -- Serhey Popovych <serhe.popovych@gmail.com>  Mon, 02 Mar 2020 14:45:44 +0200
+
+ipset (7.5-1) unstable; urgency=low
+
+  * New upstream version 7.5.
+  * Pass --with-ksource=/lib/modules/$kernelver/source to fix build when
+    running kernel != build kernel.
+  * Include kernel linux/in.h header instead of UAPI uapi/linux/in.h (upstream).
+
+ -- Serhey Popovych <serhe.popovych@gmail.com>  Fri, 31 Jan 2020 11:09:53 +0200
+
+ipset (7.4-1) unstable; urgency=low
+
+  * New upstream version 7.4.
+
+ -- Serhey Popovych <serhe.popovych@gmail.com>  Tue, 10 Dec 2019 14:47:42 +0200
+
+ipset (7.3-1) unstable; urgency=low
+
+  * New upstream version 7.3.
+  * Fix runtime crash in xt_set on 2.6.32 kernels.
+  * Fix DKMS depmod(8) override path.
+  * Add explicit build dependency on libtool on RHEL/CentOS.
+
+ -- Serhey Popovych <serhe.popovych@gmail.com>  Tue, 24 Sep 2019 18:34:50 +0300
+
 ipset (7.1-2) unstable; urgency=low
 
   * Build userspace library, development and administration tool packages.

@@ -9,12 +9,12 @@
 
 Summary:	Manage Linux IP sets
 Name:		ipset
-Version:	7.1
+Version:	7.6
 License:	GPLv2
 Group:		System Environment/Base
 URL:		https://github.com/serhepopovych/ipset
 Packager:	Serhey Popovych <serhe.popovych@gmail.com>
-Release:	2%{?dist}
+Release:	1%{?dist}
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root/
 
 BuildRequires:	automake autoconf pkgconfig libtool make libtool-ltdl-devel libmnl-devel
@@ -220,6 +220,23 @@ exit 0
 %doc README
 
 %changelog
+* Mon Mar 02 2020 Serhey Popovych <serhe.popovych@gmail.com> - 7.6-1
+- New upstream version 7.6.
+
+* Fri Jan 31 2020 Serhey Popovych <serhe.popovych@gmail.com> - 7.5-1
+- New upstream version 7.5.
+
+* Tue Dec 10 2019 Serhey Popovych <serhe.popovych@gmail.com> - 7.4-1
+- New upstream version 7.4.
+- Make changelog versions and dates in ipset.spec adjacent.
+  with debian/control file.
+
+* Tue Sep 24 2019 Serhey Popovych <serhe.popovych@gmail.com> - 7.3-1
+- New upstream version 7.3.
+- Fix runtime crash in xt_set on 2.6.32 kernels.
+- Fix DKMS depmod(8) override path.
+- Add explicit build dependency on libtool on RHEL/CentOS.
+
 * Wed Jan 23 2019 Serhey Popovych <serhe.popovych@gmail.com> - 7.1-2
 - Build userspace library, development and administration tool packages.
 - Based on Debian's ipset (6.38-1) package.
