@@ -216,7 +216,10 @@ set_match_v4(const struct sk_buff *skb, CONST struct xt_action_param *par)
 		info->packets.value, info->bytes.value,
 		info->packets.op, info->bytes.op);
 
-	if (info->flags & IPSET_FLAG_PHYSDEV)
+	if (par->match->revision > 4)
+		opt.physdev =
+			((const struct xt_set_info_match_v5 *)info)->physdev;
+	else if (info->flags & IPSET_FLAG_PHYSDEV)
 		opt.physdev |= IPSET_DIM_MASK;
 
 	if (info->packets.op != IPSET_COUNTER_NONE ||
@@ -229,6 +232,12 @@ set_match_v4(const struct sk_buff *skb, CONST struct xt_action_param *par)
 
 #define set_match_v4_checkentry	set_match_v1_checkentry
 #define set_match_v4_destroy	set_match_v1_destroy
+
+/* Revision 5 match */
+
+#define set_match_v5		set_match_v4
+#define set_match_v5_checkentry	set_match_v1_checkentry
+#define set_match_v5_destroy	set_match_v1_destroy
 
 /* Revision 0 interface: backward compatible with netfilter/iptables */
 
@@ -448,7 +457,10 @@ set_target_v3(struct sk_buff *skb, const struct xt_action_param *par)
 		info->map_set.flags, 0, 0, UINT_MAX,
 		0, 0, 0, 0);
 
-	if (info->flags & IPSET_FLAG_PHYSDEV)
+	if (par->target->revision > 3)
+		add_opt.physdev =
+			((const struct xt_set_info_target_v4 *)info)->physdev;
+	else if (info->flags & IPSET_FLAG_PHYSDEV)
 		add_opt.physdev |= IPSET_DIM_MASK;
 
 	/* Normalize to fit into jiffies */
@@ -565,6 +577,12 @@ set_target_v3_destroy(const struct xt_tgdtor_param *par)
 		ip_set_nfnl_put(XT_PAR_NET(par), info->map_set.index);
 }
 
+/* Revision 4 target */
+
+#define set_target_v4			set_target_v3
+#define set_target_v4_checkentry	set_target_v3_checkentry
+#define set_target_v4_destroy		set_target_v3_destroy
+
 static struct xt_match set_matches[] __read_mostly = {
 	{
 		.name		= "set",
@@ -659,6 +677,27 @@ static struct xt_match set_matches[] __read_mostly = {
 		.destroy	= set_match_v4_destroy,
 		.me		= THIS_MODULE
 	},
+	/* proper support for "physdev:" prefix */
+	{
+		.name		= "set",
+		.family		= NFPROTO_IPV4,
+		.revision	= 5,
+		.match		= set_match_v5,
+		.matchsize	= sizeof(struct xt_set_info_match_v5),
+		.checkentry	= set_match_v5_checkentry,
+		.destroy	= set_match_v5_destroy,
+		.me		= THIS_MODULE
+	},
+	{
+		.name		= "set",
+		.family		= NFPROTO_IPV6,
+		.revision	= 5,
+		.match		= set_match_v5,
+		.matchsize	= sizeof(struct xt_set_info_match_v5),
+		.checkentry	= set_match_v5_checkentry,
+		.destroy	= set_match_v5_destroy,
+		.me		= THIS_MODULE
+	},
 };
 
 static struct xt_target set_targets[] __read_mostly = {
@@ -732,6 +771,27 @@ static struct xt_target set_targets[] __read_mostly = {
 		.targetsize	= sizeof(struct xt_set_info_target_v3),
 		.checkentry	= set_target_v3_checkentry,
 		.destroy	= set_target_v3_destroy,
+		.me		= THIS_MODULE
+	},
+	/* proper support for "physdev:" prefix */
+	{
+		.name		= "SET",
+		.revision	= 4,
+		.family		= NFPROTO_IPV4,
+		.target		= set_target_v4,
+		.targetsize	= sizeof(struct xt_set_info_target_v4),
+		.checkentry	= set_target_v4_checkentry,
+		.destroy	= set_target_v4_destroy,
+		.me		= THIS_MODULE
+	},
+	{
+		.name		= "SET",
+		.revision	= 4,
+		.family		= NFPROTO_IPV6,
+		.target		= set_target_v4,
+		.targetsize	= sizeof(struct xt_set_info_target_v4),
+		.checkentry	= set_target_v4_checkentry,
+		.destroy	= set_target_v4_destroy,
 		.me		= THIS_MODULE
 	},
 };
