@@ -176,7 +176,7 @@ hash_netiface4_kadt(struct ip_set *set, const struct sk_buff *skb,
 #define IFACE(dir)	(XAP_STATE(par)->dir ? XAP_STATE(par)->dir->name : "")
 #define SRCDIR		(opt->flags & IPSET_DIM_TWO_SRC)
 
-	if (opt->cmdflags & IPSET_FLAG_PHYSDEV) {
+	if (opt->physdev & IPSET_DIM_TWO_SRC) {
 #if IS_ENABLED(CONFIG_BRIDGE_NETFILTER)
 		const char *eiface = SRCDIR ? get_physindev_name(skb) :
 					      get_physoutdev_name(skb);
@@ -394,7 +394,7 @@ hash_netiface6_kadt(struct ip_set *set, const struct sk_buff *skb,
 	ip6addrptr(skb, opt->flags & IPSET_DIM_ONE_SRC, &e.ip.in6);
 	ip6_netmask(&e.ip, e.cidr);
 
-	if (opt->cmdflags & IPSET_FLAG_PHYSDEV) {
+	if (opt->physdev & IPSET_DIM_TWO_SRC) {
 #if IS_ENABLED(CONFIG_BRIDGE_NETFILTER)
 		const char *eiface = SRCDIR ? get_physindev_name(skb) :
 					      get_physoutdev_name(skb);

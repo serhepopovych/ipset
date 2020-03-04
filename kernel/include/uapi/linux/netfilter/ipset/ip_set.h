@@ -244,6 +244,7 @@ enum ip_set_dim {
 	 * If changed, new revision of iptables match/target is required.
 	 */
 	IPSET_DIM_MAX = 6,
+	IPSET_DIM_MASK = ((1 << (IPSET_DIM_MAX + 1)) - 1) & ~1U,
 	/* Backward compatibility: set match revision 2 */
 	IPSET_BIT_RETURN_NOMATCH = 7,
 };

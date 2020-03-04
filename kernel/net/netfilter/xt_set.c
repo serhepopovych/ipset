@@ -52,11 +52,12 @@ match_set(ip_set_id_t index, const struct sk_buff *skb,
 	return inv;
 }
 
-#define ADT_OPT(n, f, d, fs, cfs, t, p, b, po, bo)	\
+#define ADT_OPT(n, f, d, fs, pd, cfs, t, p, b, po, bo)	\
 struct ip_set_adt_opt n = {				\
 	.family	= f,					\
 	.dim = d,					\
 	.flags = fs,					\
+	.physdev = pd,					\
 	.cmdflags = cfs,				\
 	.ext.timeout = t,				\
 	.ext.packets = p,				\
@@ -73,7 +74,7 @@ set_match_v0(const struct sk_buff *skb, CONST struct xt_action_param *par)
 	const struct xt_set_info_match_v0 *info = par->matchinfo;
 
 	ADT_OPT(opt, XT_FAMILY(par), info->match_set.u.compat.dim,
-		info->match_set.u.compat.flags, 0, UINT_MAX,
+		info->match_set.u.compat.flags, 0, 0, UINT_MAX,
 		0, 0, 0, 0);
 
 	return match_set(info->match_set.index, skb, par, &opt,
@@ -137,7 +138,7 @@ set_match_v1(const struct sk_buff *skb, CONST struct xt_action_param *par)
 	const struct xt_set_info_match_v1 *info = par->matchinfo;
 
 	ADT_OPT(opt, XT_FAMILY(par), info->match_set.dim,
-		info->match_set.flags, 0, UINT_MAX,
+		info->match_set.flags, 0, 0, UINT_MAX,
 		0, 0, 0, 0);
 
 	if (opt.flags & IPSET_RETURN_NOMATCH)
@@ -185,9 +186,12 @@ set_match_v3(const struct sk_buff *skb, CONST struct xt_action_param *par)
 	const struct xt_set_info_match_v3 *info = par->matchinfo;
 
 	ADT_OPT(opt, XT_FAMILY(par), info->match_set.dim,
-		info->match_set.flags, info->flags, UINT_MAX,
+		info->match_set.flags, 0, info->flags, UINT_MAX,
 		info->packets.value, info->bytes.value,
 		info->packets.op, info->bytes.op);
+
+	if (info->flags & IPSET_FLAG_PHYSDEV)
+		opt.physdev |= IPSET_DIM_MASK;
 
 	if (info->packets.op != IPSET_COUNTER_NONE ||
 	    info->bytes.op != IPSET_COUNTER_NONE)
@@ -208,9 +212,12 @@ set_match_v4(const struct sk_buff *skb, CONST struct xt_action_param *par)
 	const struct xt_set_info_match_v4 *info = par->matchinfo;
 
 	ADT_OPT(opt, XT_FAMILY(par), info->match_set.dim,
-		info->match_set.flags, info->flags, UINT_MAX,
+		info->match_set.flags, 0, info->flags, UINT_MAX,
 		info->packets.value, info->bytes.value,
 		info->packets.op, info->bytes.op);
+
+	if (info->flags & IPSET_FLAG_PHYSDEV)
+		opt.physdev |= IPSET_DIM_MASK;
 
 	if (info->packets.op != IPSET_COUNTER_NONE ||
 	    info->bytes.op != IPSET_COUNTER_NONE)
@@ -239,10 +246,10 @@ set_target_v0(struct sk_buff *skb, const struct xt_action_param *par)
 	const struct xt_set_info_target_v0 *info = par->targinfo;
 
 	ADT_OPT(add_opt, XT_FAMILY(par), info->add_set.u.compat.dim,
-		info->add_set.u.compat.flags, 0, UINT_MAX,
+		info->add_set.u.compat.flags, 0, 0, UINT_MAX,
 		0, 0, 0, 0);
 	ADT_OPT(del_opt, XT_FAMILY(par), info->del_set.u.compat.dim,
-		info->del_set.u.compat.flags, 0, UINT_MAX,
+		info->del_set.u.compat.flags, 0, 0, UINT_MAX,
 		0, 0, 0, 0);
 
 	if (info->add_set.index != IPSET_INVALID_ID)
@@ -319,10 +326,10 @@ set_target_v1(struct sk_buff *skb, const struct xt_action_param *par)
 	const struct xt_set_info_target_v1 *info = par->targinfo;
 
 	ADT_OPT(add_opt, XT_FAMILY(par), info->add_set.dim,
-		info->add_set.flags, 0, UINT_MAX,
+		info->add_set.flags, 0, 0, UINT_MAX,
 		0, 0, 0, 0);
 	ADT_OPT(del_opt, XT_FAMILY(par), info->del_set.dim,
-		info->del_set.flags, 0, UINT_MAX,
+		info->del_set.flags, 0, 0, UINT_MAX,
 		0, 0, 0, 0);
 
 	if (info->add_set.index != IPSET_INVALID_ID)
@@ -395,11 +402,14 @@ set_target_v2(struct sk_buff *skb, const struct xt_action_param *par)
 	const struct xt_set_info_target_v2 *info = par->targinfo;
 
 	ADT_OPT(add_opt, XT_FAMILY(par), info->add_set.dim,
-		info->add_set.flags, info->flags, info->timeout,
+		info->add_set.flags, 0, info->flags, info->timeout,
 		0, 0, 0, 0);
 	ADT_OPT(del_opt, XT_FAMILY(par), info->del_set.dim,
-		info->del_set.flags, 0, UINT_MAX,
+		info->del_set.flags, 0, 0, UINT_MAX,
 		0, 0, 0, 0);
+
+	if (info->flags & IPSET_FLAG_PHYSDEV)
+		add_opt.physdev |= IPSET_DIM_MASK;
 
 	/* Normalize to fit into jiffies */
 	if (add_opt.ext.timeout != IPSET_NO_TIMEOUT &&
@@ -429,14 +439,17 @@ set_target_v3(struct sk_buff *skb, const struct xt_action_param *par)
 	int ret;
 
 	ADT_OPT(add_opt, XT_FAMILY(par), info->add_set.dim,
-		info->add_set.flags, info->flags, info->timeout,
+		info->add_set.flags, 0, info->flags, info->timeout,
 		0, 0, 0, 0);
 	ADT_OPT(del_opt, XT_FAMILY(par), info->del_set.dim,
-		info->del_set.flags, 0, UINT_MAX,
+		info->del_set.flags, 0, 0, UINT_MAX,
 		0, 0, 0, 0);
 	ADT_OPT(map_opt, XT_FAMILY(par), info->map_set.dim,
-		info->map_set.flags, 0, UINT_MAX,
+		info->map_set.flags, 0, 0, UINT_MAX,
 		0, 0, 0, 0);
+
+	if (info->flags & IPSET_FLAG_PHYSDEV)
+		add_opt.physdev |= IPSET_DIM_MASK;
 
 	/* Normalize to fit into jiffies */
 	if (add_opt.ext.timeout != IPSET_NO_TIMEOUT &&
