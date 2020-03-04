@@ -145,6 +145,7 @@ struct ip_set_adt_opt {
 	u8 family;		/* Actual protocol family */
 	u8 dim;			/* Dimension of match/target */
 	u8 flags;		/* Direction and negation flags */
+	u8 physdev;		/* Physical device flags */
 	u32 cmdflags;		/* Command-like flags */
 	struct ip_set_ext ext;	/* Extensions */
 };
