@@ -319,9 +319,13 @@ elif test -f $ksourcedir/include/linux/netlink.h && \
    $AWK '/ netlink_dump_start\(/,/\)/' $ksourcedir/include/linux/netlink.h | $GREP -q 'min_dump_alloc.*;'; then
 	AC_MSG_RESULT(6 args)
 	AC_SUBST(HAVE_NETLINK_DUMP_START_ARGS, 6)
-else
+elif test -f $ksourcedir/include/linux/netlink.h && \
+   $AWK '/^struct netlink_dump_control {/,/\}/' $ksourcedir/include/linux/netlink.h | $GREP -q '\(\*start\)'; then
 	AC_MSG_RESULT(4 args)
 	AC_SUBST(HAVE_NETLINK_DUMP_START_ARGS, 4)
+else
+	AC_MSG_RESULT(7 fake args)
+	AC_SUBST(HAVE_NETLINK_DUMP_START_ARGS, 7)
 fi
 
 AC_MSG_CHECKING([kernel source for ns_capable])

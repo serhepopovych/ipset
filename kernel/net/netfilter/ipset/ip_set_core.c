@@ -1734,7 +1734,9 @@ IPSET_CBFN(ip_set_dump, struct net *net, struct sock *ctnl,
 #else
 	{
 		struct netlink_dump_control c = {
+#if HAVE_NETLINK_DUMP_START_ARGS == 4
 			.start = ip_set_dump_start,
+#endif
 			.dump = ip_set_dump_do,
 			.done = ip_set_dump_done,
 		};
