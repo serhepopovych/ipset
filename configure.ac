@@ -207,6 +207,16 @@ if test "$BUILDKMOD" == "yes"
 then
 dnl Check kernel incompatibilities... Ugly like hell
 
+AC_MSG_CHECKING([kernel source for INIT_DEFERRABLE_WORK])
+if test -f $ksourcedir/include/linux/workqueue.h && \
+   $GREP -q 'INIT_DEFERRABLE_WORK' $ksourcedir/include/linux/workqueue.h; then
+	AC_MSG_RESULT(yes)
+	AC_SUBST(HAVE_INIT_DEFERRABLE_WORK, define)
+else
+	AC_MSG_RESULT(no)
+	AC_SUBST(HAVE_INIT_DEFERRABLE_WORK, undef)
+fi
+
 AC_MSG_CHECKING([kernel source for system_power_efficient_wq])
 if test -f $ksourcedir/include/linux/workqueue.h && \
    $GREP -q 'system_power_efficient_wq' $ksourcedir/include/linux/workqueue.h; then
