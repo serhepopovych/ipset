@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+purge)
+	rm -rf /etc/ipset/ipset /etc/ipset/ipset.save
+;;
+esac
+
+#DEBHELPER#

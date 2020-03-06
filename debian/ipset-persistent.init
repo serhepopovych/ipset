@@ -1,0 +1,310 @@
+#!/bin/sh -e
+#
+# ipset      Start, stop and save IP sets
+#
+# chkconfig: 2345 07 93
+# description:  Starts, stops and saves IP sets
+#
+# config: /etc/sysconfig/ipset
+# config: /etc/sysconfig/iptables-config
+# config: /etc/sysconfig/ip6tables-config
+#
+### BEGIN INIT INFO
+# Provides: ipset
+# Required-Start:
+# Required-Stop:
+# Should-Start:
+# Should-Stop:
+# X-Start-Before:    iptables-persistent netfilter-persistent iptables ip6tables
+# X-Stop-After:      iptables-persistent netfilter-persistent iptables ip6tables
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: start and stop IP sets
+# Description:       Start, stop and save IP sets
+### END INIT INFO
+
+IPSET_DATA='/etc/ipset/ipset'
+
+if ! command -v ipset >/dev/null 2>&1; then
+	echo 'ipset not found.'
+	exit 5
+fi
+
+# Remove temporary files on exit
+CLEAN_FILES=''
+trap '[ -z "${CLEAN_FILES-}" ] || rm -f $CLEAN_FILES' EXIT
+
+# No access to group and others
+umask 0077
+
+## Load ipset configuration
+
+if   [ -r ${IPSET_CONFIG:='/etc/default/ipset-persistent'} ]; then
+    . "$IPSET_CONFIG"
+elif [ -r ${IPSET_CONFIG:='/etc/sysconfig/ipset-config'} ]; then
+    . "$IPSET_CONFIG"
+fi
+
+# Default configuration if not specified in config
+: ${IPSET_SAVE_ON_STOP:=no} ${IPSET_SAVE_ON_RESTART:=no}
+
+## Load iptables configuration(s)
+
+if   [ -r ${IPTABLES_CONFIG:='/etc/default/netfilter-persistent'} ]; then
+    . "$IPTABLES_CONFIG"
+elif [ -r ${IPTABLES_CONFIG:='/etc/default/iptables-persistent'} ]; then
+    . "$IPTABLES_CONFIG"
+elif [ -r ${IPTABLES_CONFIG:='/etc/sysconfig/iptables-config'} ]; then
+    . "$IPTABLES_CONFIG"
+
+    IP6TABLES_CONFIG='/etc/sysconfig/ip6tables-config'
+    [ ! -r "$IP6TABLES_CONFIG" ] || . "$IP6TABLES_CONFIG"
+fi
+
+[ "${IPTABLES_SAVE_ON_STOP:-no}" = 'no' ] &&
+[ "${IP6TABLES_SAVE_ON_STOP:-no}" = 'no' ] ||
+    SAVE_ON_STOP=yes
+
+[ "${IPTABLES_SAVE_ON_RESTART:-no}" = 'no' ] &&
+[ "${IP6TABLES_SAVE_ON_RESTART:-no}" = 'no' ] ||
+    SAVE_ON_RESTART=yes
+
+# It doesn't make sense to save iptables config and not our config
+[ "${SAVE_ON_STOP:-no}" = 'no' ] || IPSET_SAVE_ON_STOP=yes
+[ "${SAVE_ON_RESTART:-no}" = 'no' ] || IPSET_SAVE_ON_RESTART=yes
+
+unset SAVE_ON_STOP IPTABLES_SAVE_ON_STOP IP6TABLES_SAVE_ON_STOP
+unset SAVE_ON_RESTART IPTABLES_SAVE_ON_RESTART IP6TABLES_SAVE_ON_RESTART
+
+used()
+{
+    local r='\s\+[0-9]\+\s\+\([0-9]\+\)\s\+.\+$'
+    local xt_set_r="^xt_set$r"
+    local em_ipset_r="^em_ipset$r"
+
+    local ref ret=0
+
+    ref="$(sed -n -e "s/$xt_set_r/\1/p" /proc/modules)"
+    if [ ${ref:-0} -ne 0 ]; then
+        echo 'Current iptables/ip6tables configuration requires ipsets'
+        ret=$((ret + 1))
+    fi
+
+    ref="$(sed -n -e "s/$em_ipset_r/\1/p" /proc/modules)"
+    if [ ${ref:-0} -ne 0 ]; then
+        echo 'Current iproute2-tc configuration requires ipsets'
+        ret=$((ret + 1))
+    fi
+
+    [ $ret -gt 0 ]
+}
+
+running()
+{
+    # Suppress output when running
+    _status 0 ''
+}
+
+stopped()
+{
+    # Suppress output when NOT running
+    _status '' 1
+}
+
+_start()
+{
+    local ret=0
+
+    # Get the lists of sets in current(old) config and new config
+    local old_sets="$(ipset list -name | sort -u)"
+    [ -n "$old_sets" ] || return 0
+    local new_sets="$(
+        sed -n -e 's/^create\s\+\(\S\+\)\s\+.\+$/\1/p' "$IPSET_DATA" | sort -u
+    )"
+
+    # Create named pipe (fifo) for data exchange
+    local TMP_FIFO
+
+    TMP_FIFO="$(mktemp -q -u)" &&
+    CLEAN_FILES="$CLEAN_FILES$TMP_FIFO " &&
+    mkfifo "$TMP_FIFO" || return 1
+
+    # List of sets no longer wanted
+    local drop_sets="$(
+        printf '%s\n' "$old_sets" >"$TMP_FIFO"  &
+        printf '%s\n' "$new_sets" | comm -23 "$TMP_FIFO" -
+    )"
+
+    # Get rid of sets no longer needed.
+    # Unfortunately `-exist' doesn't work for destroy,
+    # so we have to do it a command at a time.
+    local ifs="$IFS"
+    IFS='
+'
+    set -- $drop_sets
+    IFS="$ifs"
+
+    while [ $# -gt 0 ]; do
+        if [ -n "$1" ]; then
+            # If it won't go - ? in use by iptables, just clear it
+            if ipset destroy "$1" 2>/dev/null; then
+                :
+            else
+                ret=$((ret + $?))
+                ipset flush "$1" || ret=$((ret + $?))
+            fi
+        fi
+        shift
+    done
+
+    # Now delete the set members no longer required
+    ipset save | grep '^add\s\+' | sort >"$TMP_FIFO" &
+    grep '^add\s\+' "$IPSET_DATA" | sort | \
+        comm -23 "$TMP_FIFO" - | \
+        sed -e 's/^add\s\+\(\S\+\)\s\+\(\S\+\).*$/del \1 \2/' | \
+    ipset restore -exist || ret=$((ret + $?))
+
+    return $ret
+}
+
+start()
+{
+    # Do not start if there is no config file.
+    if [ ! -s "$IPSET_DATA" ]; then
+        echo 'Loaded with no configuration'
+        return 0
+    fi
+
+    # The following may fail for some bizarre reason
+    if ! _start; then
+        echo 'Warning: Some old configuration may remain'
+    fi
+
+    # This is the easy way to start but would leave any old
+    # entries still configured. Still, better than nothing -
+    # but fine if we had no config
+    ipset restore -exist <"$IPSET_DATA"
+}
+
+_stop()
+{
+    local ret=0
+
+    # Flush sets
+    ipset flush || ret=$((ret + $?))
+
+    # Delete ipset sets. If we don't do them individually, then none
+    # will be deleted unless they all can be.
+    local ifs="$IFS"
+    IFS='
+'
+    set -- $(ipset list -name)
+    IFS="$ifs"
+
+    while [ $# -gt 0 ]; do
+        if [ -n "$1" ]; then
+            # If it won't go - ? in use by iptables, just clear it
+            ipset destroy "$1" 2>/dev/null || ret=$((ret + $?))
+        fi
+        shift
+    done
+
+    return $ret
+}
+
+stop()
+{
+    # Nothing to do if not running.
+    running || return 0
+    # Skip if sets being used.
+    ! used || return 1
+
+    local ret=0
+
+    if _stop; then
+        :
+    else
+        ret=$?
+        echo 'Warning: Not all sets were flushed/deleted'
+    fi
+
+    return $ret
+}
+
+restart()
+{
+    # start() removes old sets/items and adds new ones
+    start
+}
+
+save()
+{
+    # Nothing to save: no sets
+    [ -n "$(ipset list -name)" ] || return 0
+
+    local ret=0
+
+    # Save ipset data to temporary file
+    local TMP_FILE
+
+    TMP_FILE=$(mktemp -q "$IPSET_DATA.XXXXXXXX") &&
+    CLEAN_FILES="$CLEAN_FILES$TMP_FILE " &&
+    ipset save >"$TMP_FILE" 2>/dev/null &&
+    [ -s "$TMP_FILE" ] || return 1
+
+    # No need to do anything if the files are the same
+    if [ -f "$IPSET_DATA" ]; then
+       if ! cmp -s "$TMP_FILE" "$IPSET_DATA"; then
+           cp -fp "$IPSET_DATA" "$IPSET_DATA.save" &&
+           mv "$TMP_FILE" "$IPSET_DATA" || ret=$((ret + $?))
+       fi
+    else
+        mv "$TMP_FILE" "$IPSET_DATA" || ret=$((ret + $?))
+    fi
+
+    return $ret
+}
+
+_status()
+{
+    local running_0=''
+    local running_1=' not'
+
+    local ret=0
+
+    grep -q '^ip_set ' /proc/modules || ret=1
+
+    # _status <0_quiet> <1_quiet>
+    eval "[ -n \"\${$((ret + 1)):+x}\" ] ||
+          echo \"ipset is\$running_${ret} running\""
+
+    return $ret
+}
+
+status()
+{
+    _status
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        [ "$IPSET_SAVE_ON_STOP" = 'no' ] || save
+        stop
+        ;;
+    restart|reload)
+        [ "$IPSET_SAVE_ON_RESTART" = 'no' ] || save
+        restart
+        ;;
+    save)
+        save
+        ;;
+    status)
+        status
+        ;;
+    *)
+        echo >&2 'Usage: ipset {start|stop|restart|save|status}'
+        exit 1
+esac

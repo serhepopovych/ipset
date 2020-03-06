@@ -1,3 +1,10 @@
+ipset (7.6-2) unstable; urgency=low
+
+  * Add ipset-persistent package to support persistent data store and restore.
+  * Add sentences to Description: of specific packages to explain their purpose.
+
+ -- Serhey Popovych <serhe.popovych@gmail.com>  Fri, 06 Mar 2020 19:25:05 +0200
+
 ipset (7.6-1) unstable; urgency=low
 
   * New upstream version 7.6.
