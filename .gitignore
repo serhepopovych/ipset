@@ -51,6 +51,12 @@ kernel/include/linux/netfilter/ipset/ip_set_compiler.h
 !/debian/*-dkms.install
 !/debian/*-dkms.manpages
 !/debian/*-dkms.modprobe
+!/debian/*-persistent.default
+!/debian/*-persistent.dirs
+!/debian/*-persistent.init
+!/debian/*-persistent.install
+!/debian/*-persistent.postrm
+!/debian/*-persistent.service
 !/debian/ipset.docs
 !/debian/ipset.install
 !/debian/ipset.manpages

@@ -26,6 +26,8 @@ Requires:	%{name}-libs%{?_isa} = %{version}-%{release}
 %define _srcdir %{_prefix}/src/%{name}-%{version}
 %define _dkmsdir %{_prefix}/lib/dkms
 %define __find_provides  %{_dkmsdir}/find-provides
+%define _legacy_actions %{_libexecdir}/initscripts/legacy-actions
+%{!?_unitdir:%define _unitdir /usr/lib/systemd/system}
 
 %description
 IP sets are a framework inside the Linux 2.4.x and 2.6.x kernel which can be
@@ -66,6 +68,9 @@ If you want to
 
 then IP sets may be the proper tool for you.
 
+This package contains the shared libraries needed to run programs that use
+the IP sets library.
+
 %package devel
 Summary:	Development files for %{name}
 Requires:	%{name}-libs%{?_isa} == %{version}-%{release}
@@ -89,6 +94,9 @@ If you want to
 
 then IP sets may be the proper tool for you.
 
+This package contains the development libraries and header files you need to
+develop your programs using the IP sets library.
+
 %package dkms
 Summary:	DKMS source for ipset kernel part
 Requires:	dkms >= 1.95
@@ -111,6 +119,38 @@ If you want to
    iptables rule and benefit from the speed of IP sets.
 
 then IP sets may be the proper tool for you.
+
+This package provides the dkms source code for the ipset kernel modules.
+Kernel source or headers are required to compile these modules.
+
+%package services
+Summary:		ipset service to save/restore ipsets
+Requires:		%{name} = %{version}-%{release}
+Conflicts:		%{name}-service
+Requires:		coreutils
+Requires:		diffutils
+BuildArch:		noarch
+
+%description services
+IP sets are a framework inside the Linux 2.4.x and 2.6.x kernel which can be
+administered by the ipset(8) utility. Depending on the type, currently an
+IP set may store IP addresses, (TCP/UDP) port numbers or IP addresses with
+MAC addresses in a way  which ensures lightning speed when matching an
+entry against a set.
+
+If you want to
+
+ * store multiple IP addresses or port numbers and match against the
+   entire collection using a single iptables rule.
+ * dynamically update iptables rules against IP addresses or ports without
+   performance penalty.
+ * express complex IP address and ports based rulesets with a single
+   iptables rule and benefit from the speed of IP sets.
+
+then IP sets may be the proper tool for you.
+
+This package provides the service ipset that is split out of the base package
+since it is not active by default.
 
 %prep
 if [ "$RPM_BUILD_ROOT" != "/" ]; then
@@ -161,15 +201,31 @@ if [ -f %{_sourcedir}/common.postinst ]; then
 	install -m 755 %{_sourcedir}/common.postinst $RPM_BUILD_ROOT/%{_datadir}/%{name}-dkms/postinst
 fi
 
+# install directories
+install -d $RPM_BUILD_ROOT/%{_sysconfdir}/sysconfig
+install -d $RPM_BUILD_ROOT/%{_sysconfdir}/%{name}
+
+# install systemd unit file
+install -D -m 644 %{_sourcedir}/rpm/%{name}.service \
+    $RPM_BUILD_ROOT/%{_unitdir}/%{name}.service
+
+# install supporting script
+install -D -m 755 %{_sourcedir}/rpm/%{name}.init \
+    $RPM_BUILD_ROOT/%{_sysconfdir}/init.d/%{name}
+
+# install ipset-config
+install -D -m 644 %{_sourcedir}/rpm/%{name}.default \
+    $RPM_BUILD_ROOT/%{_sysconfdir}/sysconfig/%{name}-config
+
+# install legacy actions for service command
+install -D -m 755 %{_sourcedir}/rpm/%{name}.save-legacy \
+    $RPM_BUILD_ROOT/%{_legacy_actions}/%{name}/save
+install -D -m 755 %{_sourcedir}/rpm/%{name}.flush-legacy \
+    $RPM_BUILD_ROOT/%{_legacy_actions}/%{name}/flush
+
 %clean
 if [ "$RPM_BUILD_ROOT" != "/" ]; then
 	rm -rf $RPM_BUILD_ROOT
-fi
-
-%preun
-if [[ $1 -eq 0 && -n $(lsmod | grep "^xt_set ") ]]; then
-    rmmod xt_set 2>/dev/null
-    [[ $? -ne 0 ]] && echo Current iptables configuration requires ipsets && exit 1
 fi
 
 %files

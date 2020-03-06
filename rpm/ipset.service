@@ -1,0 +1,16 @@
+[Unit]
+Description=IP sets for iptables
+Before=iptables.service
+Before=ip6tables.service
+Before=netfilter-persistent.service
+Before=iptables-persistent.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/etc/init.d/ipset start
+ExecStop=/etc/init.d/ipset stop
+EnvironmentFile=-/etc/default/ipset
+
+[Install]
+WantedBy=basic.target
