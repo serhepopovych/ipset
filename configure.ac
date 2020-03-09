@@ -212,9 +212,12 @@ if test -f $ksourcedir/include/linux/workqueue.h && \
    $GREP -q 'system_power_efficient_wq' $ksourcedir/include/linux/workqueue.h; then
 	AC_MSG_RESULT(yes)
 	AC_SUBST(HAVE_SYSTEM_POWER_EFFICIENT_WQ, define)
-else
+elif test -f $ksourcedir/include/linux/workqueue.h && \
+   $GREP -q 'system_wq' $ksourcedir/include/linux/workqueue.h; then
 	AC_MSG_RESULT(no)
 	AC_SUBST(HAVE_SYSTEM_POWER_EFFICIENT_WQ, undef)
+else
+	AC_MSG_ERROR([Kernel source tree is too old, at least v2.36 is required])
 fi
 
 AC_MSG_CHECKING([kernel source for struct xt_action_param])
