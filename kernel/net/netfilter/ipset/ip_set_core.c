@@ -622,10 +622,9 @@ ip_set_add_packets(u64 packets, struct ip_set_counter *counter)
 
 static void
 ip_set_update_counter(struct ip_set_counter *counter,
-		      const struct ip_set_ext *ext, u32 flags)
+		      const struct ip_set_ext *ext)
 {
-	if (ext->packets != ULLONG_MAX &&
-	    !(flags & IPSET_FLAG_SKIP_COUNTER_UPDATE)) {
+	if (ext->packets != ULLONG_MAX) {
 		ip_set_add_bytes(ext->bytes, counter);
 		ip_set_add_packets(ext->packets, counter);
 	}
@@ -649,13 +648,19 @@ ip_set_match_extensions(struct ip_set *set, const struct ip_set_ext *ext,
 	if (SET_WITH_COUNTER(set)) {
 		struct ip_set_counter *counter = ext_counter(data, set);
 
+		if (flags & IPSET_FLAG_UPDATE_COUNTERS_FIRST)
+			ip_set_update_counter(counter, ext);
+
 		if (flags & IPSET_FLAG_MATCH_COUNTERS &&
 		    !(ip_set_match_counter(ip_set_get_packets(counter),
 				mext->packets, mext->packets_op) &&
 		      ip_set_match_counter(ip_set_get_bytes(counter),
 				mext->bytes, mext->bytes_op)))
 			return false;
-		ip_set_update_counter(counter, ext, flags);
+
+		if (!(flags & (IPSET_FLAG_UPDATE_COUNTERS_FIRST |
+			       IPSET_FLAG_SKIP_COUNTER_UPDATE)))
+			ip_set_update_counter(counter, ext);
 	}
 	if (SET_WITH_SKBINFO(set))
 		ip_set_get_skbinfo(ext_skbinfo(data, set),
