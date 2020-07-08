@@ -469,5 +469,17 @@ static inline u16 nfnl_msg_type(u8 subsys, u8 msg_type)
 #define dev_get_by_index_rcu __dev_get_by_index
 #endif
 
+/* Compiler attributes */
+#ifndef __has_attribute
+# define __has_attribute(x) __GCC4_has_attribute_##x
+# define __GCC4_has_attribute___fallthrough__		0
+#endif
+
+#if __has_attribute(__fallthrough__)
+# define fallthrough			__attribute__((__fallthrough__))
+#else
+# define fallthrough			do {} while (0)  /* fallthrough */
+#endif
+
 #endif /* IP_SET_COMPAT_HEADERS */
 #endif /* __IP_SET_COMPAT_H */
