@@ -646,27 +646,6 @@ static struct xt_match set_matches[] __read_mostly = {
 		.destroy	= set_match_v4_destroy,
 		.me		= THIS_MODULE
 	},
-	/* --update-counters-first flag support */
-	{
-		.name		= "set",
-		.family		= NFPROTO_IPV4,
-		.revision	= 5,
-		.match		= set_match_v4,
-		.matchsize	= sizeof(struct xt_set_info_match_v4),
-		.checkentry	= set_match_v4_checkentry,
-		.destroy	= set_match_v4_destroy,
-		.me		= THIS_MODULE
-	},
-	{
-		.name		= "set",
-		.family		= NFPROTO_IPV6,
-		.revision	= 5,
-		.match		= set_match_v4,
-		.matchsize	= sizeof(struct xt_set_info_match_v4),
-		.checkentry	= set_match_v4_checkentry,
-		.destroy	= set_match_v4_destroy,
-		.me		= THIS_MODULE
-	},
 };
 
 static struct xt_target set_targets[] __read_mostly = {
