@@ -50,7 +50,7 @@ struct ipset_data {
 		char setname2[IPSET_MAXNAMELEN];
 		/* CREATE/LIST/SAVE */
 		struct {
-			uint8_t probes;
+			uint8_t bucketsize;
 			uint8_t resize;
 			uint8_t netmask;
 			uint32_t hashsize;
@@ -301,8 +301,8 @@ ipset_data_set(struct ipset_data *data, enum ipset_opt opt, const void *value)
 	case IPSET_OPT_NETMASK:
 		data->create.netmask = *(const uint8_t *) value;
 		break;
-	case IPSET_OPT_PROBES:
-		data->create.probes = *(const uint8_t *) value;
+	case IPSET_OPT_BUCKETSIZE:
+		data->create.bucketsize = *(const uint8_t *) value;
 		break;
 	case IPSET_OPT_RESIZE:
 		data->create.resize = *(const uint8_t *) value;
@@ -508,8 +508,8 @@ ipset_data_get(const struct ipset_data *data, enum ipset_opt opt)
 		return &data->create.markmask;
 	case IPSET_OPT_NETMASK:
 		return &data->create.netmask;
-	case IPSET_OPT_PROBES:
-		return &data->create.probes;
+	case IPSET_OPT_BUCKETSIZE:
+		return &data->create.bucketsize;
 	case IPSET_OPT_RESIZE:
 		return &data->create.resize;
 	case IPSET_OPT_SIZE:
@@ -625,7 +625,7 @@ ipset_data_sizeof(enum ipset_opt opt, uint8_t family)
 	case IPSET_OPT_CIDR:
 	case IPSET_OPT_CIDR2:
 	case IPSET_OPT_NETMASK:
-	case IPSET_OPT_PROBES:
+	case IPSET_OPT_BUCKETSIZE:
 	case IPSET_OPT_RESIZE:
 	case IPSET_OPT_PROTO:
 		return sizeof(uint8_t);

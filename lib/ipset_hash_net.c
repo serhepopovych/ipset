@@ -531,6 +531,89 @@ static struct ipset_type ipset_hash_net6 = {
 	.description = "skbinfo support",
 };
 
+/* bucketsize support */
+static struct ipset_type ipset_hash_net7 = {
+	.name = "hash:net",
+	.alias = { "nethash", NULL },
+	.revision = 7,
+	.family = NFPROTO_IPSET_IPV46,
+	.dimension = IPSET_DIM_ONE,
+	.elem = {
+		[IPSET_DIM_ONE - 1] = {
+			.parse = ipset_parse_ip4_net6,
+			.print = ipset_print_ip,
+			.opt = IPSET_OPT_IP
+		},
+	},
+	.cmd = {
+		[IPSET_CREATE] = {
+			.args = {
+				IPSET_ARG_FAMILY,
+				/* Aliases */
+				IPSET_ARG_INET,
+				IPSET_ARG_INET6,
+				IPSET_ARG_HASHSIZE,
+				IPSET_ARG_MAXELEM,
+				IPSET_ARG_TIMEOUT,
+				IPSET_ARG_COUNTERS,
+				IPSET_ARG_COMMENT,
+				IPSET_ARG_FORCEADD,
+				IPSET_ARG_SKBINFO,
+				IPSET_ARG_BUCKETSIZE,
+				/* Ignored options: backward compatibilty */
+				IPSET_ARG_PROBES,
+				IPSET_ARG_RESIZE,
+				IPSET_ARG_NONE,
+			},
+			.need = 0,
+			.full = 0,
+			.help = "",
+		},
+		[IPSET_ADD] = {
+			.args = {
+				IPSET_ARG_TIMEOUT,
+				IPSET_ARG_NOMATCH,
+				IPSET_ARG_PACKETS,
+				IPSET_ARG_BYTES,
+				IPSET_ARG_ADT_COMMENT,
+				IPSET_ARG_SKBMARK,
+				IPSET_ARG_SKBPRIO,
+				IPSET_ARG_SKBQUEUE,
+				IPSET_ARG_NONE,
+			},
+			.need = IPSET_FLAG(IPSET_OPT_IP),
+			.full = IPSET_FLAG(IPSET_OPT_IP)
+				| IPSET_FLAG(IPSET_OPT_CIDR)
+				| IPSET_FLAG(IPSET_OPT_IP_TO),
+			.help = "IP[/CIDR]",
+		},
+		[IPSET_DEL] = {
+			.args = {
+				IPSET_ARG_NONE,
+			},
+			.need = IPSET_FLAG(IPSET_OPT_IP),
+			.full = IPSET_FLAG(IPSET_OPT_IP)
+				| IPSET_FLAG(IPSET_OPT_CIDR)
+				| IPSET_FLAG(IPSET_OPT_IP_TO),
+			.help = "IP[/CIDR]",
+		},
+		[IPSET_TEST] = {
+			.args = {
+				IPSET_ARG_NOMATCH,
+				IPSET_ARG_NONE,
+			},
+			.need = IPSET_FLAG(IPSET_OPT_IP),
+			.full = IPSET_FLAG(IPSET_OPT_IP)
+				| IPSET_FLAG(IPSET_OPT_CIDR),
+			.help = "IP[/CIDR]",
+		},
+	},
+	.usage = "where depending on the INET family\n"
+		 "      IP is an IPv4 or IPv6 address (or hostname),\n"
+		 "      CIDR is a valid IPv4 or IPv6 CIDR prefix.",
+	.description = "bucketsize support",
+};
+
 void _init(void);
 void _init(void)
 {
@@ -541,4 +624,5 @@ void _init(void)
 	ipset_type_add(&ipset_hash_net4);
 	ipset_type_add(&ipset_hash_net5);
 	ipset_type_add(&ipset_hash_net6);
+	ipset_type_add(&ipset_hash_net7);
 }

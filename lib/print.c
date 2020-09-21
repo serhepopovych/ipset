@@ -945,7 +945,7 @@ ipset_print_data(char *buf, unsigned int len,
 	case IPSET_OPT_MAXELEM:
 	case IPSET_OPT_MARKMASK:
 	case IPSET_OPT_NETMASK:
-	case IPSET_OPT_PROBES:
+	case IPSET_OPT_BUCKETSIZE:
 	case IPSET_OPT_RESIZE:
 	case IPSET_OPT_TIMEOUT:
 	case IPSET_OPT_REFERENCES:

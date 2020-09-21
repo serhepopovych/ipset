@@ -1,7 +1,7 @@
 Name: test
 Type: hash:mac
-Header: hashsize 1024 maxelem 2 skbinfo
-Size in memory: 448
+Header: hashsize 1024 maxelem 2 skbinfo bucketsize 12
+Size in memory: 496
 References: 0
 Number of entries: 2
 Members:

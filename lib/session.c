@@ -438,9 +438,9 @@ static const struct ipset_attr_policy create_attrs[] = {
 		.type = MNL_TYPE_U8,
 		.opt = IPSET_OPT_NETMASK,
 	},
-	[IPSET_ATTR_PROBES] = {
+	[IPSET_ATTR_BUCKETSIZE] = {
 		.type = MNL_TYPE_U8,
-		.opt = IPSET_OPT_PROBES,
+		.opt = IPSET_OPT_BUCKETSIZE,
 	},
 	[IPSET_ATTR_RESIZE] = {
 		.type = MNL_TYPE_U8,
