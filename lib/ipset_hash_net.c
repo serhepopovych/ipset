@@ -560,6 +560,7 @@ static struct ipset_type ipset_hash_net7 = {
 				IPSET_ARG_FORCEADD,
 				IPSET_ARG_SKBINFO,
 				IPSET_ARG_BUCKETSIZE,
+				IPSET_ARG_INITVAL,
 				/* Ignored options: backward compatibilty */
 				IPSET_ARG_PROBES,
 				IPSET_ARG_RESIZE,
@@ -611,7 +612,7 @@ static struct ipset_type ipset_hash_net7 = {
 	.usage = "where depending on the INET family\n"
 		 "      IP is an IPv4 or IPv6 address (or hostname),\n"
 		 "      CIDR is a valid IPv4 or IPv6 CIDR prefix.",
-	.description = "bucketsize support",
+	.description = "bucketsize, initval support",
 };
 
 void _init(void);

@@ -418,9 +418,9 @@ static const struct ipset_attr_policy create_attrs[] = {
 		.type = MNL_TYPE_U32,
 		.opt = IPSET_OPT_CADT_FLAGS,
 	},
-	[IPSET_ATTR_GC] = {
+	[IPSET_ATTR_INITVAL] = {
 		.type = MNL_TYPE_U32,
-		.opt = IPSET_OPT_GC,
+		.opt = IPSET_OPT_INITVAL,
 	},
 	[IPSET_ATTR_HASHSIZE] = {
 		.type = MNL_TYPE_U32,

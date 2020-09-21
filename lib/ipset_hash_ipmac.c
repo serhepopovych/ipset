@@ -125,6 +125,7 @@ static struct ipset_type ipset_hash_ipmac1 = {
 				IPSET_ARG_FORCEADD,
 				IPSET_ARG_SKBINFO,
 				IPSET_ARG_BUCKETSIZE,
+				IPSET_ARG_INITVAL,
 			},
 			.need = 0,
 			.full = 0,
@@ -171,7 +172,7 @@ static struct ipset_type ipset_hash_ipmac1 = {
 	.usage = "where depending on the INET family\n"
 		 "      IP is a valid IPv4 or IPv6 address (or hostname),\n"
 		 "      MAC is a MAC address.",
-	.description = "bucketsize support",
+	.description = "bucketsize, initval support",
 };
 
 void _init(void);

@@ -533,6 +533,7 @@ static struct ipset_type ipset_hash_ipport6 = {
 				IPSET_ARG_FORCEADD,
 				IPSET_ARG_SKBINFO,
 				IPSET_ARG_BUCKETSIZE,
+				IPSET_ARG_INITVAL,
 				/* Ignored options: backward compatibilty */
 				IPSET_ARG_PROBES,
 				IPSET_ARG_RESIZE,
@@ -600,7 +601,7 @@ static struct ipset_type ipset_hash_ipport6 = {
 		 "      Adding/deleting multiple elements with TCP/SCTP/UDP/UDPLITE\n"
 		 "      port range is supported both for IPv4 and IPv6.",
 	.usagefn = ipset_port_usage,
-	.description = "bucketsize support",
+	.description = "bucketsize, initval support",
 };
 
 void _init(void);

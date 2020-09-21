@@ -749,6 +749,7 @@ static struct ipset_type ipset_hash_netiface8 = {
 				IPSET_ARG_FORCEADD,
 				IPSET_ARG_SKBINFO,
 				IPSET_ARG_BUCKETSIZE,
+				IPSET_ARG_INITVAL,
 				IPSET_ARG_NONE,
 			},
 			.need = 0,
@@ -808,7 +809,7 @@ static struct ipset_type ipset_hash_netiface8 = {
 		 "      IP is a valid IPv4 or IPv6 address (or hostname),\n"
 		 "      CIDR is a valid IPv4 or IPv6 CIDR prefix.\n"
 		 "      Adding/deleting multiple elements with IPv4 is supported.",
-	.description = "bucketsize support",
+	.description = "bucketsize, initval support",
 };
 
 void _init(void);

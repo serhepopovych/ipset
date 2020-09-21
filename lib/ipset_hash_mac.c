@@ -100,6 +100,7 @@ static struct ipset_type ipset_hash_mac1 = {
 				IPSET_ARG_FORCEADD,
 				IPSET_ARG_SKBINFO,
 				IPSET_ARG_BUCKETSIZE,
+				IPSET_ARG_INITVAL,
 				IPSET_ARG_NONE,
 			},
 			.need = 0,
@@ -139,7 +140,7 @@ static struct ipset_type ipset_hash_mac1 = {
 		},
 	},
 	.usage = "",
-	.description = "bucketsize support",
+	.description = "bucketsize, initval support",
 };
 
 void _init(void);

@@ -324,6 +324,7 @@ static struct ipset_type ipset_hash_ipmark3 = {
 				IPSET_ARG_FORCEADD,
 				IPSET_ARG_SKBINFO,
 				IPSET_ARG_BUCKETSIZE,
+				IPSET_ARG_INITVAL,
 				/* Ignored options: backward compatibilty */
 				IPSET_ARG_PROBES,
 				IPSET_ARG_RESIZE,
@@ -383,7 +384,7 @@ static struct ipset_type ipset_hash_ipmark3 = {
 		 "      is supported for IPv4.\n"
 		 "      Adding/deleting single mark element\n"
 		 "      is supported both for IPv4 and IPv6.",
-	.description = "bucketsize support",
+	.description = "bucketsize, initval support",
 };
 
 void _init(void);

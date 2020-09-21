@@ -292,6 +292,14 @@ static const struct ipset_arg ipset_args[] = {
 		.print = ipset_print_number,
 		.help = "[bucketsize VALUE]",
 	},
+	[IPSET_ARG_INITVAL] = {
+		.name = { "initval", NULL },
+		.has_arg = IPSET_MANDATORY_ARG,
+		.opt = IPSET_OPT_INITVAL,
+		.parse = ipset_parse_uint32,
+		.print = ipset_print_hexnumber,
+		.help = "[initval VALUE]",
+	},
 };
 
 const struct ipset_arg *

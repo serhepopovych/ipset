@@ -423,6 +423,7 @@ static struct ipset_type ipset_hash_ip5 = {
 				IPSET_ARG_FORCEADD,
 				IPSET_ARG_SKBINFO,
 				IPSET_ARG_BUCKETSIZE,
+				IPSET_ARG_INITVAL,
 				/* Ignored options: backward compatibilty */
 				IPSET_ARG_PROBES,
 				IPSET_ARG_RESIZE,
@@ -473,7 +474,7 @@ static struct ipset_type ipset_hash_ip5 = {
 		 "      CIDR is a valid IPv4 or IPv6 CIDR prefix.\n"
 		 "      Adding/deleting multiple elements in IP/CIDR or FROM-TO form\n"
 		 "      is supported for IPv4.",
-	.description = "bucketsize support",
+	.description = "bucketsize, initval support",
 };
 
 void _init(void);

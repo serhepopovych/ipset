@@ -323,6 +323,7 @@ static struct ipset_type ipset_hash_netnet3 = {
 				IPSET_ARG_FORCEADD,
 				IPSET_ARG_SKBINFO,
 				IPSET_ARG_BUCKETSIZE,
+				IPSET_ARG_INITVAL,
 				IPSET_ARG_NONE,
 			},
 			.need = 0,
@@ -383,7 +384,7 @@ static struct ipset_type ipset_hash_netnet3 = {
 		 "      IP is an IPv4 or IPv6 address (or hostname),\n"
 		 "      CIDR is a valid IPv4 or IPv6 CIDR prefix.\n"
 		 "      IP range is not supported with IPv6.",
-	.description = "bucketsize support",
+	.description = "bucketsize, initval support",
 };
 
 void _init(void);

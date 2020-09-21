@@ -35,7 +35,7 @@ static const struct ipset_attrname createattr2name[] = {
 	[IPSET_ATTR_PROTO]	= { .name = "PROTO" },
 	[IPSET_ATTR_CADT_FLAGS]	= { .name = "CADT_FLAGS" },
 	[IPSET_ATTR_CADT_LINENO] = { .name = "CADT_LINENO" },
-	[IPSET_ATTR_GC]		= { .name = "GC" },
+	[IPSET_ATTR_INITVAL]	= { .name = "INITVAL" },
 	[IPSET_ATTR_HASHSIZE]	= { .name = "HASHSIZE" },
 	[IPSET_ATTR_MAXELEM]	= { .name = "MAXELEM" },
 	[IPSET_ATTR_MARKMASK]	= { .name = "MARKMASK" },

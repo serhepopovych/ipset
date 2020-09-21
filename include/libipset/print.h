@@ -35,6 +35,9 @@ extern int ipset_print_ipaddr(char *buf, unsigned int len,
 extern int ipset_print_number(char *buf, unsigned int len,
 			      const struct ipset_data *data,
 			      enum ipset_opt opt, uint8_t env);
+extern int ipset_print_hexnumber(char *buf, unsigned int len,
+				 const struct ipset_data *data,
+				 enum ipset_opt opt, uint8_t env);
 extern int ipset_print_name(char *buf, unsigned int len,
 			    const struct ipset_data *data,
 			    enum ipset_opt opt, uint8_t env);

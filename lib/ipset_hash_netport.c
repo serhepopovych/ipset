@@ -699,6 +699,7 @@ static struct ipset_type ipset_hash_netport8 = {
 				IPSET_ARG_FORCEADD,
 				IPSET_ARG_SKBINFO,
 				IPSET_ARG_BUCKETSIZE,
+				IPSET_ARG_INITVAL,
 				IPSET_ARG_NONE,
 			},
 			.need = 0,
@@ -764,7 +765,7 @@ static struct ipset_type ipset_hash_netport8 = {
 		 "      Adding/deleting multiple elements with TCP/SCTP/UDP/UDPLITE\n"
 		 "      port range is supported both for IPv4 and IPv6.",
 	.usagefn = ipset_port_usage,
-	.description = "bucketsize support",
+	.description = "bucketsize, initval support",
 };
 
 void _init(void);

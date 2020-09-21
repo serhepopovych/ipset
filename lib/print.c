@@ -397,6 +397,50 @@ ipset_print_number(char *buf, unsigned int len,
 }
 
 /**
+ * ipset_print_hexnumber - print number in hex to string
+ * @buf: printing buffer
+ * @len: length of available buffer space
+ * @data: data blob
+ * @opt: the option kind
+ * @env: environment flags
+ *
+ * Print number in hex to output buffer.
+ *
+ * Return lenght of printed string or error size.
+ */
+int
+ipset_print_hexnumber(char *buf, unsigned int len,
+		      const struct ipset_data *data, enum ipset_opt opt,
+		      uint8_t env UNUSED)
+{
+	size_t maxsize;
+	const void *number;
+
+	assert(buf);
+	assert(len > 0);
+	assert(data);
+
+	number = ipset_data_get(data, opt);
+	maxsize = ipset_data_sizeof(opt, AF_INET);
+	D("opt: %u, maxsize %zu", opt, maxsize);
+	if (maxsize == sizeof(uint8_t))
+		return snprintf(buf, len, "0x%02"PRIx8,
+				*(const uint8_t *) number);
+	else if (maxsize == sizeof(uint16_t))
+		return snprintf(buf, len, "0x%04"PRIx16,
+				*(const uint16_t *) number);
+	else if (maxsize == sizeof(uint32_t))
+		return snprintf(buf, len, "0x%08"PRIx32,
+				(long unsigned) *(const uint32_t *) number);
+	else if (maxsize == sizeof(uint64_t))
+		return snprintf(buf, len, "0x016lx",
+				(long long unsigned) *(const uint64_t *) number);
+	else
+		assert(0);
+	return 0;
+}
+
+/**
  * ipset_print_name - print setname element string
  * @buf: printing buffer
  * @len: length of available buffer space
@@ -940,7 +984,7 @@ ipset_print_data(char *buf, unsigned int len,
 	case IPSET_OPT_IFACE:
 		size = ipset_print_iface(buf, len, data, opt, env);
 		break;
-	case IPSET_OPT_GC:
+	case IPSET_OPT_INITVAL:
 	case IPSET_OPT_HASHSIZE:
 	case IPSET_OPT_MAXELEM:
 	case IPSET_OPT_MARKMASK:
