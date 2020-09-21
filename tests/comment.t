@@ -9,9 +9,9 @@
 # Bitmap comment: Test element with comment
 0 ipset test test 2.0.0.1
 # Bitmap comment: List set
-0 ipset list test | grep -v Revision: > .foo
+0 ipset list test > .foo
 # Bitmap comment: Check listing
-0 diff -u -I 'Size in memory.*' .foo comment.t.list0
+0 ./diff.sh .foo comment.t.list0
 # Bitmap comment: Delete element with comment
 0 ipset del test 2.0.0.1
 # Bitmap comment: Test deleted element
@@ -31,9 +31,9 @@
 # Bitmap comment: Add multiple elements with comment
 0 for x in `seq 1 255`; do echo "add test 2.0.0.$x comment \\\"text message $x\\\""; done | ipset restore
 # Bitmap comment: List set
-0 ipset list test | grep -v Revision: > .foo
+0 ipset list test > .foo
 # Bitmap comment: Check listing
-0 diff -u -I 'Size in memory.*' .foo comment.t.list1
+0 ./diff.sh .foo comment.t.list1
 # Bitmap comment: Delete test set
 0 ipset destroy test
 # Bitmap comment: create set with timeout
@@ -43,15 +43,15 @@
 # Bitmap comment: Add multiple elements with zero timeout
 0 for x in `seq 1 255`; do echo "add test 2.0.1.$x timeout 0 comment \\\"text message $x\\\""; done | ipset restore
 # Bitmap comment: List set
-0 ipset list test | grep -v Revision: | sed 's/timeout ./timeout x/' > .foo
+0 ipset list test > .foo
 # Bitmap comment: Check listing
-0 diff -u -I 'Size in memory.*' .foo comment.t.list11
+0 ./diff.sh .foo comment.t.list11
 # Sleep 5s so that entries can time out
 0 sleep 5s
 # Bitmap comment: List set
-0 ipset list test | grep -v Revision: | sed 's/timeout ./timeout x/' > .foo
+0 ipset list test > .foo
 # Bitmap comment: Check listing
-0 diff -u -I 'Size in memory.*' -I 'Number of entries' .foo comment.t.list12
+0 ./diff.sh .foo comment.t.list12
 # Bitmap comment: Flush set
 0 ipset flush test
 # Bitmap comment: Delete test set
@@ -87,9 +87,9 @@
 # Hash comment: Try to add IP address
 0 ipset add test 2.0.0.1,2.0.0.2 
 # Hash comment: List set
-0 ipset list test | grep -v Revision: > .foo0 && ./sort.sh .foo0
+0 ipset list test > .foo0 && ./sort.sh .foo0
 # Hash comment: Check listing
-0 diff -u -I 'Size in memory.*' .foo comment.t.list2
+0 ./diff.sh .foo comment.t.list2
 # Hash comment: Update element with comment
 0 ipset -! add test 2.0.0.1,2.0.0.2 comment "text 2.0.0.1,2.0.0.2"
 # Hash comment: Check updated element
@@ -123,15 +123,15 @@
 # Hash comment: Add multiple elements with zero timeout
 0 for x in `seq 0 255`; do echo "add test 2.0.1.$x timeout 0 comment \\\"text message $x\\\""; done | ipset restore
 # Hash comment: List set
-0 ipset list test | grep -v Revision: | sed 's/timeout ./timeout x/' > .foo0 && ./sort.sh .foo0
+0 ipset list test > .foo0 && ./sort.sh .foo0
 # Hash comment: Check listing
-0 diff -u -I 'Size in memory.*' .foo comment.t.list21
+0 ./diff.sh .foo comment.t.list21
 # Sleep 5s so that entries can time out
 0 sleep 5s
 # Hash comment: List set
-0 ipset list test | grep -v Revision: | sed 's/timeout ./timeout x/' > .foo0 && ./sort.sh .foo0
+0 ipset list test > .foo0 && ./sort.sh .foo0
 # Hash comment: Check listing
-0 diff -u -I 'Size in memory.*' .foo comment.t.list22
+0 ./diff.sh .foo comment.t.list22
 # Hash comment: Flush set
 0 ipset flush test
 # Hash comment: Delete test set
@@ -147,9 +147,9 @@
 # List comment: Add b set with comment
 0 ipset a test b after a comment "b set comment"
 # List comment: List sets
-0 ipset list | grep -v Revision: > .foo
+0 ipset list > .foo
 # List comment: Check listing
-0 diff -u -I 'Size in memory.*' .foo comment.t.list3
+0 ./diff.sh .foo comment.t.list3
 # Flush sets
 0 ipset f
 # Destroy sets

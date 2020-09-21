@@ -1,6 +1,7 @@
 Name: test
 Type: hash:ip
-Header: family inet6 hashsize 128 maxelem 65536 timeout 4 bucketsize 12
+Revision: 5
+Header: family inet6 hashsize 128 maxelem 65536 timeout 4 bucketsize 12 initval 0xb377cb25
 Size in memory: 504
 References: 0
 Number of entries: 1

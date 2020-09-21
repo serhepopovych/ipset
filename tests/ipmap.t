@@ -49,15 +49,15 @@
 # Range: Restore set
 0 ipset -R < ipmap.t.restore && rm ipmap.t.restore
 # Range: List set
-0 ipset -L test | grep -v Revision: > .foo
+0 ipset -L test > .foo
 # Range: Check listing
-0 diff -u -I 'Size in memory.*' .foo ipmap.t.list0
+0 ./diff.sh .foo ipmap.t.list0
 # Range: Delete a range of elements
 0 ipset -! -D test 2.0.0.128-2.0.0.132
 # Range: List set
-0 ipset -L test | grep -v Revision: > .foo
+0 ipset -L test > .foo
 # Range: Check listing
-0 diff -u -I 'Size in memory.*' .foo ipmap.t.list1
+0 ./diff.sh .foo ipmap.t.list1
 # Range: Flush test set
 0 ipset -F test
 # Range: Delete test set
@@ -91,9 +91,9 @@
 # Network: Delete the same element
 0 ipset -D test 2.0.0.128
 # Network: List set
-0 ipset -L test | grep -v Revision: > .foo
+0 ipset -L test > .foo
 # Network: Check listing
-0 diff -u -I 'Size in memory.*' .foo ipmap.t.list2
+0 ./diff.sh .foo ipmap.t.list2
 # Network: Flush test set
 0 ipset -F test
 # Network: Delete test set
@@ -127,9 +127,9 @@
 # Subnets: Add a subnet of subnets
 0 ipset -A test 10.8.0.0/16
 # Subnets: List set
-0 ipset -L test | grep -v Revision: > .foo
+0 ipset -L test > .foo
 # Subnets: Check listing
-0 diff -u -I 'Size in memory.*' .foo ipmap.t.list3
+0 ./diff.sh .foo ipmap.t.list3
 # Subnets: FLush test set
 0 ipset -F test
 # Subnets: Delete test set
@@ -153,9 +153,9 @@
 # Full: Delete same element
 0 ipset -D test 0.1.0.0
 # Full: List set
-0 ipset -L test | grep -v Revision: > .foo
+0 ipset -L test > .foo
 # Full: Check listing
-0 diff -u -I 'Size in memory.*' .foo ipmap.t.list4
+0 ./diff.sh .foo ipmap.t.list4
 # Full: Delete test set
 0 ipset -X test
 # eof

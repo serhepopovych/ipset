@@ -45,9 +45,9 @@
 # Restore saved sets
 0 ipset -R < setlist.t.r
 # List set
-0 ipset -L test | grep -v Revision: > .foo
+0 ipset -L test > .foo
 # Check listing
-0 diff -u -I 'Size in memory.*' .foo setlist.t.list0
+0 ./diff.sh .foo setlist.t.list0
 # Flush all sets
 0 ipset -F
 # Delete all sets
@@ -61,9 +61,9 @@
 # Add set a before b
 0 ipset add test a before b
 # List test set
-0 ipset list test | grep -v Revision: > .foo
+0 ipset list test > .foo
 # Check listing
-0 diff -u -I 'Size in memory.*' .foo setlist.t.list1
+0 ./diff.sh .foo setlist.t.list1
 # Test a set before b
 0 ipset test test a before b
 # Test c set after b
@@ -71,19 +71,19 @@
 # Delete b set before c
 0 ipset del test b before c
 # List test set
-0 ipset list test | grep -v Revision: > .foo
+0 ipset list test > .foo
 # Check listing
-0 diff -u -I 'Size in memory.*' .foo setlist.t.list2
+0 ./diff.sh .foo setlist.t.list2
 # Delete c set after a
 0 ipset del test c after a
 # List test set
-0 ipset list test | grep -v Revision: > .foo
+0 ipset list test > .foo
 # Check listing
-0 diff -u -I 'Size in memory.*' .foo setlist.t.list3
+0 ./diff.sh .foo setlist.t.list3
 # List all sets
-0 sleep .1s; ipset list | grep -v Revision: > .foo
+0 sleep .1s; ipset list > .foo
 # Check listing
-0 diff -u -I 'Size in memory.*' .foo setlist.t.list4
+0 ./diff.sh .foo setlist.t.list4
 # Flush sets
 0 ipset flush
 # Destroy sets

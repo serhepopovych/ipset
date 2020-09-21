@@ -33,15 +33,15 @@
 # Try to add IP address
 0 ipset add test 3:0:0::1
 # List set
-0 ipset list test | grep -v Revision: | sed 's/timeout ./timeout x/' > .foo0 && ./sort.sh .foo0
+0 ipset list test > .foo0 && ./sort.sh .foo0
 # Check listing
-0 diff -u -I 'Size in memory.*' .foo hash:net6.t.list0
+0 ./diff.sh .foo hash:net6.t.list0
 # Sleep 5s so that element can time out
 0 sleep 5
 # IP: List set
-0 ipset -L test 2>/dev/null | grep -v Revision: > .foo0 && ./sort.sh .foo0
+0 ipset -L test > .foo0 && ./sort.sh .foo0
 # IP: Check listing
-0 diff -u -I 'Size in memory.*' .foo hash:net6.t.list1
+0 ./diff.sh .foo hash:net6.t.list1
 # Flush test set
 0 ipset flush test
 # Delete test set

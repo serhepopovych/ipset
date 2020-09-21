@@ -33,15 +33,15 @@
 # Try to add IP address
 0 ipset add test 2.0.0.1,2.0.0.2
 # List set
-0 ipset list test | grep -v Revision: | sed 's/timeout ./timeout x/' > .foo0 && ./sort.sh .foo0
+0 ipset list test > .foo0 && ./sort.sh .foo0
 # Check listing
-0 diff -u -I 'Size in memory.*' .foo hash:net,net.t.list0
+0 ./diff.sh .foo hash:net,net.t.list0
 # Sleep 5s so that element can time out
 0 sleep 5
 # List set
-0 ipset -L test 2>/dev/null | grep -v Revision: > .foo0 && ./sort.sh .foo0
+0 ipset -L test > .foo0 && ./sort.sh .foo0
 # Check listing
-0 diff -u -I 'Size in memory.*' .foo hash:net,net.t.list1
+0 ./diff.sh .foo hash:net,net.t.list1
 # Flush test set
 0 ipset flush test
 # Delete test set
@@ -51,9 +51,9 @@
 # Add networks in range notation
 0 ipset add test 10.2.0.0-10.2.1.12,10.3.0.0-10.3.1.12
 # List set
-0 ipset -L test 2>/dev/null | grep -v Revision: > .foo0 && ./sort.sh .foo0
+0 ipset -L test > .foo0 && ./sort.sh .foo0
 # Check listing
-0 diff -u -I 'Size in memory.*' .foo hash:net,net.t.list2
+0 ./diff.sh .foo hash:net,net.t.list2
 # Delete test set
 0 ipset destroy test
 # Stress test with range notation

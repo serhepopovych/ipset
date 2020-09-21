@@ -35,15 +35,15 @@
 # Range: Add a range of elements
 0 ipset -A test 2.0.0.128-2.0.0.131 timeout 4
 # Range: List set
-0 ipset list test | grep -v Revision: | sed 's/timeout ./timeout x/' > .foo
+0 ipset list test > .foo
 # Range: Check listing
-0 diff -u -I 'Size in memory.*' .foo bitmap:ip.t.list4
+0 ./diff.sh .foo bitmap:ip.t.list4
 # Sleep 5s so that entries can time out
 0 sleep 5s
 # Range: List set after timeout
-0 ipset list test | grep -v Revision: > .foo
+0 ipset list test > .foo
 # Range: Check listing
-0 diff -u -I 'Size in memory.*' .foo bitmap:ip.t.list0
+0 ./diff.sh .foo bitmap:ip.t.list0
 # Range: Flush test set
 0 ipset flush test
 # Range: Delete test set
@@ -77,15 +77,15 @@
 # Network: Delete the same element
 0 ipset -D test 2.0.0.128
 # Network: List set
-0 ipset list test | grep -v Revision: | sed 's/timeout ./timeout x/' > .foo
+0 ipset list test > .foo
 # Network: Check listing
-0 diff -u -I 'Size in memory.*' .foo bitmap:ip.t.list5
+0 ./diff.sh .foo bitmap:ip.t.list5
 # Sleep 5s so that entries can time out
 0 sleep 5s
 # Network: List set
-0 ipset list test | grep -v Revision: > .foo
+0 ipset list test > .foo
 # Network: Check listing
-0 diff -u -I 'Size in memory.*' .foo bitmap:ip.t.list1
+0 ./diff.sh .foo bitmap:ip.t.list1
 # Network: Flush test set
 0 ipset flush test
 # Network: Delete test set
@@ -119,15 +119,15 @@
 # Subnets: Add a subnet of subnets
 0 ipset -A test 10.8.0.0/16 timeout 4
 # Subnets: List set
-0 ipset list test | grep -v Revision: | sed 's/timeout ./timeout x/' > .foo
+0 ipset list test > .foo
 # Subnets: Check listing
-0 diff -u -I 'Size in memory.*' .foo bitmap:ip.t.list6
+0 ./diff.sh .foo bitmap:ip.t.list6
 # Sleep 5s so that entries can time out
 0 sleep 5s
 # Subnets: List set
-0 ipset list test | grep -v Revision: > .foo
+0 ipset list test > .foo
 # Subnets: Check listing
-0 diff -u -I 'Size in memory.*' .foo bitmap:ip.t.list2
+0 ./diff.sh .foo bitmap:ip.t.list2
 # Subnets: Flush test set
 0 ipset flush test
 # Subnets: Delete test set
@@ -145,9 +145,9 @@
 # Full: Test element not added to the set
 1 ipset test test 0.1.0.0
 # Full: List set
-0 ipset list test | grep -v Revision: > .foo
+0 ipset list test > .foo
 # Full: Check listing
-0 diff -u -I 'Size in memory.*' .foo bitmap:ip.t.list3
+0 ./diff.sh .foo bitmap:ip.t.list3
 # Full: flush set
 0 ipset flush test
 # Full: add element with 1s timeout

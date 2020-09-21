@@ -1,4 +1,4 @@
-create test hash:ip family inet hashsize 128 maxelem 65536 bucketsize 12
+create test hash:ip family inet hashsize 128 maxelem 65536 bucketsize 12 initval 0x00000000
 add test 10.0.0.0
 add test 10.0.0.1
 add test 10.0.0.2
@@ -128,7 +128,7 @@ add test 10.0.0.125
 add test 10.0.0.126
 add test 10.0.0.127
 add test 10.0.0.128
-create test2 hash:ip family inet hashsize 128 maxelem 65536 bucketsize 12
+create test2 hash:ip family inet hashsize 128 maxelem 65536 bucketsize 12 initval 0x00000000
 add test2 20.0.0.0
 add test2 20.0.0.1
 add test2 20.0.0.2

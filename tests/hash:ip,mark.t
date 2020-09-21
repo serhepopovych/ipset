@@ -27,15 +27,15 @@
 # Try to add value after second random value
 0 ipset add test 2.1.0.1,0x80
 # List set
-0 ipset list test | grep -v Revision: | sed 's/timeout ./timeout x/' > .foo0 && ./sort.sh .foo0
+0 ipset list test > .foo0 && ./sort.sh .foo0
 # Check listing
-0 diff -u -I 'Size in memory.*' .foo hash:ip,mark.t.list0
+0 ./diff.sh .foo hash:ip,mark.t.list0
 # Sleep 5s so that elements can time out
 0 sleep 5
 # List set
-0 ipset list test | grep -v Revision: > .foo0 && ./sort.sh .foo0
+0 ipset list test > .foo0 && ./sort.sh .foo0
 # Check listing
-0 diff -u -I 'Size in memory.*' .foo hash:ip,mark.t.list1
+0 ./diff.sh .foo hash:ip,mark.t.list1
 # Flush test set
 0 ipset flush test
 # Add multiple elements in one step

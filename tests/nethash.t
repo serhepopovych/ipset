@@ -33,9 +33,9 @@
 # Try to add IP address
 0 ipset -A test 2.0.0.1
 # List set
-0 ipset -L test | grep -v Revision: > .foo0 && ./sort.sh .foo0
+0 ipset -L test > .foo0 && ./sort.sh .foo0
 # Check listing
-0 diff -u -I 'Size in memory.*' .foo nethash.t.list0
+0 ./diff.sh .foo nethash.t.list0
 # Flush test set
 0 ipset -F test
 # Add a non-matching IP address entry

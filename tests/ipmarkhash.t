@@ -31,9 +31,9 @@
 # Try to add value after second random value
 0 ipset -A test 2.1.0.1,0x80
 # List set
-0 ipset -L test | grep -v Revision: > .foo0 && ./sort.sh .foo0
+0 ipset -L test > .foo0 && ./sort.sh .foo0
 # Check listing
-0 diff -u -I 'Size in memory.*' .foo ipmarkhash.t.list0
+0 ./diff.sh .foo ipmarkhash.t.list0
 # Flush test set
 0 ipset -F test
 # Delete test set
@@ -61,9 +61,9 @@
 # Try to add value after second random value
 0 ipset -A test 2.1.0.0,0x80
 # List set
-0 ipset -L test | grep -v Revision: > .foo0 && ./sort.sh .foo0
+0 ipset -L test > .foo0 && ./sort.sh .foo0
 # Check listing
-0 diff -u -I 'Size in memory.*' .foo ipmarkhash.t.list1
+0 ./diff.sh .foo ipmarkhash.t.list1
 # Flush test set
 0 ipset -F test
 # Delete test set

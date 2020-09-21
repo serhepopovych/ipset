@@ -41,25 +41,25 @@
 # Test ICMPv6 by name
 0 ipset test test 192:168:68::95,icmpv6:port-unreachable
 # List set
-0 ipset list test | grep -v Revision: | sed 's/timeout ./timeout x/' > .foo0 && ./sort.sh .foo0
+0 ipset list test > .foo0 && ./sort.sh .foo0
 # Save set
 0 ipset save test > hash:net6,port.t.restore
 # Check listing
-0 diff -u -I 'Size in memory.*' .foo hash:net6,port.t.list0
+0 ./diff.sh .foo hash:net6,port.t.list0
 # Sleep 5s so that element can time out
 0 sleep 5
 # IP: List set
-0 ipset -L test 2>/dev/null | grep -v Revision: > .foo0 && ./sort.sh .foo0
+0 ipset -L test > .foo0 && ./sort.sh .foo0
 # IP: Check listing
-0 diff -u -I 'Size in memory.*' .foo hash:net6,port.t.list1
+0 ./diff.sh .foo hash:net6,port.t.list1
 # Destroy set
 0 ipset x test
 # Restore set
 0 ipset restore < hash:net6,port.t.restore && rm hash:net6,port.t.restore
 # List set
-0 ipset list test | grep -v Revision: | sed 's/timeout ./timeout x/' > .foo0 && ./sort.sh .foo0
+0 ipset list test > .foo0 && ./sort.sh .foo0
 # Check listing
-0 diff -u -I 'Size in memory.*' .foo hash:net6,port.t.list0
+0 ./diff.sh .foo hash:net6,port.t.list0
 # Flush test set
 0 ipset flush test
 # Add multiple elements in one step

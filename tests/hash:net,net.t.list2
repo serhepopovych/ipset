@@ -1,6 +1,7 @@
 Name: test
 Type: hash:net,net
-Header: family inet hashsize 1024 maxelem 65536 bucketsize 12
+Revision: 3
+Header: family inet hashsize 1024 maxelem 65536 bucketsize 12 initval 0x957a74a3
 Size in memory: 1752
 References: 0
 Number of entries: 16

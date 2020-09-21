@@ -1,5 +1,5 @@
 #!/bin/sh
 
-head -n 7 $1 > .foo
-tail -n +8 $1 | grep  '[[:alnum:]]' | sort >> .foo
-rm $1
+sed '/Members:/q' $1 > .foo
+awk '/Members:/,EOF' $1 | grep -v 'Members:' | sort >> .foo
+rm -f $1

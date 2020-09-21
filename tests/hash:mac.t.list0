@@ -1,6 +1,7 @@
 Name: test
 Type: hash:mac
-Header: hashsize 128 maxelem 65536 timeout 4 bucketsize 12
+Revision: 1
+Header: hashsize 128 maxelem 65536 timeout 4 bucketsize 12 initval 0x851b9eb1
 Size in memory: 464
 References: 0
 Number of entries: 1

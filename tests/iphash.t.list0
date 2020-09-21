@@ -1,6 +1,7 @@
 Name: test
 Type: hash:ip
-Header: family inet hashsize 128 maxelem 65536 bucketsize 12
+Revision: 5
+Header: family inet hashsize 128 maxelem 65536 bucketsize 12 initval 0x9806dfda
 Size in memory: 416
 References: 0
 Number of entries: 2

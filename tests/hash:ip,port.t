@@ -31,15 +31,15 @@
 # Delete port by number
 0 ipset del test 2.1.0.3,25
 # List set
-0 ipset list test | grep -v Revision: | sed 's/timeout ./timeout x/' > .foo0 && ./sort.sh .foo0
+0 ipset list test > .foo0 && ./sort.sh .foo0
 # Check listing
-0 diff -u -I 'Size in memory.*' .foo hash:ip,port.t.list0
+0 ./diff.sh .foo hash:ip,port.t.list0
 # Sleep 5s so that elements can time out
 0 sleep 5
 # List set
-0 ipset list test | grep -v Revision: > .foo0 && ./sort.sh .foo0
+0 ipset list test > .foo0 && ./sort.sh .foo0
 # Check listing
-0 diff -u -I 'Size in memory.*' .foo hash:ip,port.t.list1
+0 ./diff.sh .foo hash:ip,port.t.list1
 # Flush test set
 0 ipset flush test
 # Add multiple elements in one step
@@ -73,9 +73,9 @@
 # Delete element with sctp
 0 ipset del test 2.0.0.1,sctp:80
 # List set
-0 ipset list test | grep -v Revision: > .foo0 && ./sort.sh .foo0
+0 ipset list test > .foo0 && ./sort.sh .foo0
 # Check listing
-0 diff -u -I 'Size in memory.*' .foo hash:ip,port.t.list2
+0 ./diff.sh .foo hash:ip,port.t.list2
 # Delete set
 0 ipset destroy test
 # Create set to add a range
