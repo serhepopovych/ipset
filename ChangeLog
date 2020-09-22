@@ -1,3 +1,9 @@
+7.7
+  - Expose the initval hash parameter to userspace
+  - Handle all variable header parts in helper scripts instead ot test tasks
+  - Add bucketsize parameter to all hash types
+  - Support the -exist flag with the destroy command
+
 7.6
   - Add checking system_power_efficient_wq in the kernel source tree
   - .gitignore: add temporary files to the list
