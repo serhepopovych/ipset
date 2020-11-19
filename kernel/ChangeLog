@@ -1,3 +1,13 @@
+7.8
+  - Complete backward compatibility fix for package copy of <linux/jhash.h>
+  - Compatibility: check for kvzalloc() and GFP_KERNEL_ACCOUNT
+  - netfilter: ipset: enable memory accounting for ipset allocations
+    (Vasily Averin)
+  - netfilter: ipset: prevent uninit-value in hash_ip6_add (Eric Dumazet)
+  - Compatibility: use skb_policy() from if_vlan.h if available
+  - Compatibility: Check for the fourth arg of list_for_each_entry_rcu()
+  - Backward compatibility fix for the package copy of <linux/jhash.h>
+
 7.7
   - Expose the initval hash parameter to userspace
   - Add bucketsize parameter to all hash types
