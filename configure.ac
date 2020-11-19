@@ -756,6 +756,16 @@ else
 	AC_SUBST(HAVE_LIST_FOR_EACH_ENTRY_RCU_FOUR_ARGS, undef)
 fi
 
+AC_MSG_CHECKING([kernel source for skb_protocol() in if_vlan.h])
+if test -f $ksourcedir/include/linux/if_vlan.h && \
+   $GREP -q 'static inline __be16 skb_protocol' $ksourcedir/include/linux/if_vlan.h; then
+	AC_MSG_RESULT(yes)
+	AC_SUBST(HAVE_SKB_PROTOCOL, define)
+else
+	AC_MSG_RESULT(no)
+	AC_SUBST(HAVE_SKB_PROTOCOL, undef)
+fi
+
 AC_MSG_CHECKING([kernel source for struct net_generic])
 if test -f $ksourcedir/include/net/netns/generic.h && \
    $GREP -q 'struct net_generic' $ksourcedir/include/net/netns/generic.h; then

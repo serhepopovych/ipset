@@ -57,6 +57,7 @@
 #@HAVE_COND_RESCHED_RCU@ HAVE_COND_RESCHED_RCU
 #@HAVE_SKB_IIF@ HAVE_SKB_IIF
 #@HAVE_LIST_FOR_EACH_ENTRY_RCU_FOUR_ARGS@ HAVE_LIST_FOR_EACH_ENTRY_RCU_FOUR_ARGS
+#@HAVE_SKB_PROTOCOL@ HAVE_SKB_PROTOCOL
 
 #ifdef HAVE_EXPORT_SYMBOL_GPL_IN_MODULE_H
 #include <linux/module.h>
@@ -372,6 +373,9 @@ static inline int nla_put_in6_addr(struct sk_buff *skb, int attrtype,
 
 static inline __be16 tc_skb_protocol(const struct sk_buff *skb)
 {
+#ifdef HAVE_SKB_PROTOCOL
+	return skb_protocol(skb, true);
+#else
 	if (skb_vlan_tag_present(skb))
 #ifdef HAVE_VLAN_PROTO_IN_SK_BUFF
 		return skb->vlan_proto;
@@ -379,6 +383,7 @@ static inline __be16 tc_skb_protocol(const struct sk_buff *skb)
 		return htons(ETH_P_8021Q);
 #endif
 	return skb->protocol;
+#endif
 }
 #endif
 
