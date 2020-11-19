@@ -56,6 +56,7 @@
 #@HAVE_LOCKDEP_NFNL_IS_HELD@ HAVE_LOCKDEP_NFNL_IS_HELD
 #@HAVE_COND_RESCHED_RCU@ HAVE_COND_RESCHED_RCU
 #@HAVE_SKB_IIF@ HAVE_SKB_IIF
+#@HAVE_LIST_FOR_EACH_ENTRY_RCU_FOUR_ARGS@ HAVE_LIST_FOR_EACH_ENTRY_RCU_FOUR_ARGS
 
 #ifdef HAVE_EXPORT_SYMBOL_GPL_IN_MODULE_H
 #include <linux/module.h>
@@ -467,6 +468,14 @@ static inline u16 nfnl_msg_type(u8 subsys, u8 msg_type)
  * kernel crashes including em_ipset and this function call.
  */
 #define dev_get_by_index_rcu __dev_get_by_index
+#endif
+
+#ifdef HAVE_LIST_FOR_EACH_ENTRY_RCU_FOUR_ARGS
+#define list_for_each_entry_rcu_compat(pos, head, member, cond) \
+	list_for_each_entry_rcu(pos, head, member, cond)
+#else
+#define list_for_each_entry_rcu_compat(pos, head, member, cond) \
+	list_for_each_entry_rcu(pos, head, member)
 #endif
 
 /* Compiler attributes */
