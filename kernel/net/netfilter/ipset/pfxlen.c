@@ -1,6 +1,4 @@
 #include <linux/version.h>
-#define IP_SET_COMPAT_HEADERS
-#include <linux/netfilter/ipset/ip_set_compat.h>
 #include <linux/netfilter/ipset/pfxlen.h>
 
 /* Prefixlen maps for fast conversions, by Jan Engelhardt. */
