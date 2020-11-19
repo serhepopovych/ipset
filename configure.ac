@@ -776,6 +776,26 @@ else
 	AC_SUBST(HAVE_NLA_POLICY_EXACT_LEN, undef)
 fi
 
+AC_MSG_CHECKING([kernel source for kvzalloc() in mm.h])
+if test -f $ksourcedir/include/linux/mm.h && \
+   $GREP -q 'static inline void \*kvzalloc(' $ksourcedir/include/linux/mm.h; then
+	AC_MSG_RESULT(yes)
+	AC_SUBST(HAVE_KVZALLOC, define)
+else
+	AC_MSG_RESULT(no)
+	AC_SUBST(HAVE_KVZALLOC, undef)
+fi
+
+AC_MSG_CHECKING([kernel source for GFP_KERNEL_ACCOUNT in gfp.h])
+if test -f $ksourcedir/include/linux/gfp.h && \
+   $GREP -q 'define GFP_KERNEL_ACCOUNT' $ksourcedir/include/linux/gfp.h; then
+	AC_MSG_RESULT(yes)
+	AC_SUBST(HAVE_GFP_KERNEL_ACCOUNT, define)
+else
+	AC_MSG_RESULT(no)
+	AC_SUBST(HAVE_GFP_KERNEL_ACCOUNT, undef)
+fi
+
 AC_MSG_CHECKING([kernel source for struct net_generic])
 if test -f $ksourcedir/include/net/netns/generic.h && \
    $GREP -q 'struct net_generic' $ksourcedir/include/net/netns/generic.h; then

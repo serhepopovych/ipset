@@ -59,6 +59,8 @@
 #@HAVE_LIST_FOR_EACH_ENTRY_RCU_FOUR_ARGS@ HAVE_LIST_FOR_EACH_ENTRY_RCU_FOUR_ARGS
 #@HAVE_SKB_PROTOCOL@ HAVE_SKB_PROTOCOL
 #@HAVE_NLA_POLICY_EXACT_LEN@ HAVE_NLA_POLICY_EXACT_LEN
+#@HAVE_KVZALLOC@ HAVE_KVZALLOC
+#@HAVE_GFP_KERNEL_ACCOUNT@ HAVE_GFP_KERNEL_ACCOUNT
 
 #ifdef HAVE_EXPORT_SYMBOL_GPL_IN_MODULE_H
 #include <linux/module.h>
@@ -485,9 +487,36 @@ static inline u16 nfnl_msg_type(u8 subsys, u8 msg_type)
 #endif
 
 #ifndef HAVE_NLA_POLICY_EXACT_LEN
-#define HAVE_NLA_POLICY_EXACT_LEN(_len) {	\
+#define NLA_POLICY_EXACT_LEN(_len) {		\
 	.type = NLA_UNSPEC,			\
 	.len = _len				\
+}
+#endif
+
+#ifndef HAVE_KVZALLOC
+#include <linux/slab.h>
+#include <linux/vmalloc.h>
+#ifndef GFP_KERNEL_ACCOUNT
+#define GFP_KERNEL_ACCOUNT GFP_KERNEL
+#endif
+static inline void *kvzalloc(size_t size, gfp_t flags)
+{
+	void *members = NULL;
+
+	if (size < KMALLOC_MAX_SIZE)
+		members = kzalloc(size, GFP_KERNEL | __GFP_NOWARN);
+
+	if (members) {
+		pr_debug("%p: allocated with kmalloc\n", members);
+		return members;
+	}
+
+	members = vzalloc(size);
+	if (!members)
+		return NULL;
+	pr_debug("%p: allocated with vmalloc\n", members);
+
+	return members;
 }
 #endif
 
