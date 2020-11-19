@@ -58,6 +58,7 @@
 #@HAVE_SKB_IIF@ HAVE_SKB_IIF
 #@HAVE_LIST_FOR_EACH_ENTRY_RCU_FOUR_ARGS@ HAVE_LIST_FOR_EACH_ENTRY_RCU_FOUR_ARGS
 #@HAVE_SKB_PROTOCOL@ HAVE_SKB_PROTOCOL
+#@HAVE_NLA_POLICY_EXACT_LEN@ HAVE_NLA_POLICY_EXACT_LEN
 
 #ifdef HAVE_EXPORT_SYMBOL_GPL_IN_MODULE_H
 #include <linux/module.h>
@@ -481,6 +482,13 @@ static inline u16 nfnl_msg_type(u8 subsys, u8 msg_type)
 #else
 #define list_for_each_entry_rcu_compat(pos, head, member, cond) \
 	list_for_each_entry_rcu(pos, head, member)
+#endif
+
+#ifndef HAVE_NLA_POLICY_EXACT_LEN
+#define HAVE_NLA_POLICY_EXACT_LEN(_len) {	\
+	.type = NLA_UNSPEC,			\
+	.len = _len				\
+}
 #endif
 
 /* Compiler attributes */

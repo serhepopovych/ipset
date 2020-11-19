@@ -766,6 +766,16 @@ else
 	AC_SUBST(HAVE_SKB_PROTOCOL, undef)
 fi
 
+AC_MSG_CHECKING([kernel source for NLA_POLICY_EXACT_LEN() in netlink.h])
+if test -f $ksourcedir/include/net/netlink.h && \
+   $GREP -q 'define NLA_POLICY_EXACT_LEN' $ksourcedir/include/net/netlink.h; then
+	AC_MSG_RESULT(yes)
+	AC_SUBST(HAVE_NLA_POLICY_EXACT_LEN, define)
+else
+	AC_MSG_RESULT(no)
+	AC_SUBST(HAVE_NLA_POLICY_EXACT_LEN, undef)
+fi
+
 AC_MSG_CHECKING([kernel source for struct net_generic])
 if test -f $ksourcedir/include/net/netns/generic.h && \
    $GREP -q 'struct net_generic' $ksourcedir/include/net/netns/generic.h; then
