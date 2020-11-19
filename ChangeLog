@@ -1,3 +1,6 @@
+7.8
+  - Fix library versioning (Jan Engelhardt)
+
 7.7
   - Expose the initval hash parameter to userspace
   - Handle all variable header parts in helper scripts instead ot test tasks
