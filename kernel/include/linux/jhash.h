@@ -1,6 +1,6 @@
 #ifndef _LINUX_JHASH_H
 #define _LINUX_JHASH_H
-#include <linux/netfilter/ipset/ip_set_compat.h>
+#include <linux/netfilter/ipset/ip_set_compiler.h>
 
 /* jhash.h: Jenkins hash support.
  *

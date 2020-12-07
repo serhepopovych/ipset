@@ -851,7 +851,8 @@ dnl Checks for library functions.
 dnl Generate output
 AC_CONFIG_FILES([Makefile include/libipset/Makefile
 	lib/Makefile lib/libipset.pc src/Makefile utils/Makefile
-	kernel/include/linux/netfilter/ipset/ip_set_compat.h])
+	kernel/include/linux/netfilter/ipset/ip_set_compat.h
+	kernel/include/linux/netfilter/ipset/ip_set_compiler.h])
 AC_OUTPUT
 
 dnl Summary
