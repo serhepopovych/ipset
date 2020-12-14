@@ -1356,7 +1356,7 @@ IPSET_CBFN(ip_set_rename, struct net *net, struct sock *ctnl,
 			goto out;
 		}
 	}
-	strncpy(set->name, name2, IPSET_MAXNAMELEN);
+	ret = strscpy(set->name, name2, IPSET_MAXNAMELEN);
 
 out:
 	write_unlock_bh(&ip_set_ref_lock);
