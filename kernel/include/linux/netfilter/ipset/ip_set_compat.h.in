@@ -446,7 +446,12 @@ static inline u16 nfnl_msg_type(u8 subsys, u8 msg_type)
 #endif
 
 #ifndef HAVE_STRSCPY
-#define	strscpy(dst, src, n)	(strncpy(dst, src, n) == (dst))
+static inline ssize_t strscpy(char * dest, const char * src, size_t count)
+{
+	size_t ret = strlcpy(dest, src, count);
+
+	return (ret >= count ? -E2BIG : ret);
+}
 #endif
 
 #ifndef smp_mb__before_atomic
