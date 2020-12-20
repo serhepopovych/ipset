@@ -1360,7 +1360,7 @@ IPSET_CBFN(ip_set_rename, struct net *net, struct sock *ctnl,
 
 out:
 	write_unlock_bh(&ip_set_ref_lock);
-	return ret;
+	return ret < 0 ? ret : 0;
 }
 
 /* Swap two sets so that name/index points to the other.
