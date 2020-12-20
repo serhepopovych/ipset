@@ -61,6 +61,7 @@
 #@HAVE_NLA_POLICY_EXACT_LEN@ HAVE_NLA_POLICY_EXACT_LEN
 #@HAVE_KVZALLOC@ HAVE_KVZALLOC
 #@HAVE_GFP_KERNEL_ACCOUNT@ HAVE_GFP_KERNEL_ACCOUNT
+#@HAVE_NLA_STRSCPY@ HAVE_NLA_STRSCPY
 
 #ifdef HAVE_EXPORT_SYMBOL_GPL_IN_MODULE_H
 #include <linux/module.h>
@@ -452,6 +453,10 @@ static inline ssize_t strscpy(char * dest, const char * src, size_t count)
 
 	return (ret >= count ? -E2BIG : ret);
 }
+#endif
+
+#ifndef HAVE_NLA_STRSCPY
+#define nla_strscpy	nla_strlcpy
 #endif
 
 #ifndef smp_mb__before_atomic

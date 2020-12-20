@@ -725,6 +725,16 @@ else
 	AC_SUBST(HAVE_LOCKDEP_NFNL_IS_HELD, undef)
 fi
 
+AC_MSG_CHECKING([kernel source for nla_strscpy() in netlink.h])
+if test -f $ksourcedir/include/net/netlink.h && \
+   $GREP -q ' nla_strscpy' $ksourcedir/include/net/netlink.h; then
+	AC_MSG_RESULT(yes)
+	AC_SUBST(HAVE_NLA_STRSCPY, define)
+else
+	AC_MSG_RESULT(no)
+	AC_SUBST(HAVE_NLA_STRSCPY, undef)
+fi
+
 AC_MSG_CHECKING([kernel source for strscpy() in string.h])
 if test -f $ksourcedir/include/linux/timer.h && \
    $GREP -q ' strscpy' $ksourcedir/include/linux/string.h; then
