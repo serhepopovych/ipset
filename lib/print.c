@@ -431,10 +431,10 @@ ipset_print_hexnumber(char *buf, unsigned int len,
 				*(const uint16_t *) number);
 	else if (maxsize == sizeof(uint32_t))
 		return snprintf(buf, len, "0x%08"PRIx32,
-				(long unsigned) *(const uint32_t *) number);
+				*(const uint32_t *) number);
 	else if (maxsize == sizeof(uint64_t))
-		return snprintf(buf, len, "0x016lx",
-				(long long unsigned) *(const uint64_t *) number);
+		return snprintf(buf, len, "0x%016"PRIx64,
+				*(const uint64_t *) number);
 	else
 		assert(0);
 	return 0;
