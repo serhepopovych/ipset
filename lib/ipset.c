@@ -949,6 +949,11 @@ ipset_parse_argv(struct ipset *ipset, int oargc, char *oargv[])
 	int argc = oargc;
 	char *argv[MAX_ARGS] = {};
 
+	if (argc > MAX_ARGS)
+		return ipset->custom_error(ipset,
+				p, IPSET_PARAMETER_PROBLEM,
+				"Line is too long to parse.");
+
 	/* We need a local copy because of ipset_shift_argv */
 	memcpy(argv, oargv, sizeof(char *) * argc);
 
