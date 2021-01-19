@@ -33,14 +33,57 @@ icmp[6] types and interface names when adding, deleting or testing elements.
 - Complete on filenames if the current option requires it.
 - Complete variable names and command substitution.
 - Do not complete if an invalid combination of options is used.
-- Do not complete if an invalid value of an option argument is detected.
+- Optionally do not complete if an invalid value of an option argument is detected.
 - Environment variables allow to modify completion behaviour.
 
 
 Installation
 ============
 
-Put it into ~/.bash_completion or /etc/bash_completion.d/.
+Quote from bash-completion README:
+
+	Install it in one of the directories pointed to by
+	bash-completion's pkgconfig file variables.  There are two
+	alternatives: the recommended one is 'completionsdir' (get it with
+	"pkg-config --variable=completionsdir bash-completion") from which
+	completions are loaded on demand based on invoked commands' names,
+	so be sure to name your completion file accordingly, and to include
+	for example symbolic links in case the file provides completions
+	for more than one command.  The other one which is present for
+	backwards compatibility reasons is 'compatdir' (get it with
+	"pkg-config --variable=compatdir bash-completion") from which files
+	are loaded when bash_completion is loaded.
+
+	For packages using GNU autotools the installation can be handled
+	for example like this in configure.ac:
+
+	 PKG_CHECK_VAR(bashcompdir, [bash-completion], [completionsdir], ,
+	   bashcompdir="${sysconfdir}/bash_completion.d")
+	 AC_SUBST(bashcompdir)
+
+	...accompanied by this in Makefile.am:
+
+	 bashcompdir = @bashcompdir@
+	 dist_bashcomp_DATA = # completion files go here
+
+	For cmake we ship the bash-completion-config.cmake and
+	bash-completion-config-version.cmake files. Example usage:
+
+	 find_package(bash-completion)
+	 if(BASH_COMPLETION_FOUND)
+	   message(STATUS
+		 "Using bash completion dir ${BASH_COMPLETION_COMPLETIONSDIR}")
+	 else()
+	   set (BASH_COMPLETION_COMPLETIONSDIR "/etc/bash_completion.d")
+	   message (STATUS
+		 "Using fallback bash completion dir ${BASH_COMPLETION_COMPLETIONSDIR}")
+	 endif()
+
+	 install(FILES your-completion-file DESTINATION
+	   ${BASH_COMPLETION_COMPLETIONSDIR})
+
+For backwards compatibility it is still possible
+to put it into ~/.bash_completion or /etc/bash_completion.d/.
 
 Tip:
 To make tab completion more handsome put the following into either
@@ -113,6 +156,7 @@ which will be used for hostname completion.
 For all *net* type of sets and the hash:ip,mark set type, if hostname completion is attempted,
 if the environment variable **_IPSET_COMP_NETWORKS** is set to a non-empty value,
 networks are retrieved from /etc/networks.
+Means these two commands disable it: `_IPSET_COMP_NETWORKS=` or `_IPSET_COMP_NETWORKS=""`
 
 Also a list of ip addresses can be supplied using the environment variable
 **_IPSET_IPLIST_FILE**. Which should point to a file containing an ip address per line.
@@ -139,13 +183,15 @@ the list of possible completions (this is the default).
 
 ---
 
-When adding elements to a **bitmap:ip,mac** type of set,
-the environment variable **_IPSET_MACLIST_FILE** will be queried
+When completing on MAC addresses (bitmap:ip,mac, hash:mac type of set),
+the environment variable **_IPSET_MAC_COMPL_MODE** is queried to decide how to complete.
+If set to 'file' the variable **_IPSET_MACLIST_FILE** will be queried
 for a file containing a list of mac addresses.
 The file should contain one mac address per line.
 Empty lines and comments (also after the address) are supported.
-If the variable is unset mac addresses are fetched from arp cache,
-/etc/ethers and the output of `ip link show`.
+If the variable **_IPSET_MAC_COMPL_MODE** is set to 'system' mac addresses are fetched
+from arp cache, /etc/ethers and the output of `ip link show`.
+If the variable is unset or set to 'both' (default) both methods are used).
 
 ---
 
@@ -168,8 +214,8 @@ In that case it is recommended to disable input validation (see below).
 
 ---
 
-If the environment variable **_IPSET_VALIDATE_INPUT** is set to a non empty value
-validation of users input is disabled.
+If the environment variable **_IPSET_VALIDATE_INPUT** is defined and set to a non empty value
+validation of users input is enabled.
 
 ---
 
@@ -183,7 +229,7 @@ Compatibility
 
 Compatible with ipset versions 6+.
 
-Tested with ipset v6.20.1.
+Tested with ipset v6.24, v6.27.
 
 bash v4+ is required.
 
