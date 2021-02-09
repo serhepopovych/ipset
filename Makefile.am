@@ -93,6 +93,9 @@ update_includes:
 		kernel/include/uapi/linux/netfilter/ipset/$$x \
 		> include/libipset/linux_$$x; \
 	done
+	for x in ip_set_compiler.h; do \
+	    cp kernel/include/linux/netfilter/ipset/$$x include/libipset/$x; \
+	done
 
 update_utils:
 	wget -4 -O /tmp/ipset-bash-completion.tar.gz http://sourceforge.net/projects/ipset-bashcompl/files/latest/download

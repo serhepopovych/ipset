@@ -27,6 +27,7 @@
 #include <libipset/print.h>			/* ipset_print_family */
 #include <libipset/utils.h>			/* STREQ */
 #include <libipset/ipset.h>			/* prototypes */
+#include <libipset/ip_set_compiler.h>		/* compiler attributes */
 
 static char program_name[] = PACKAGE;
 static char program_version[] = PACKAGE_VERSION;
@@ -1213,6 +1214,7 @@ ipset_parse_argv(struct ipset *ipset, int oargc, char *oargv[])
 				return ret;
 		}
 		/* Fall through to parse optional setname */
+		fallthrough;
 	case IPSET_CMD_DESTROY:
 	case IPSET_CMD_FLUSH:
 		/* Args: [setname] */
