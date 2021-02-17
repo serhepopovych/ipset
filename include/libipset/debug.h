@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <sys/socket.h>
 #include <linux/netlink.h>
+#define DD(cmd)		cmd
 #define D(fmt, args...) \
 	fprintf(stderr, "%s: %s: " fmt "\n", __FILE__, __func__ , ## args)
 #define IF_D(test, fmt, args...) \
@@ -25,6 +26,7 @@ dump_nla(struct  nlattr *nla[], int maxlen)
 		D("nla[%u] does%s exist", i, nla[i] ? "" : " NOT");
 }
 #else
+#define DD(cmd)
 #define D(fmt, args...)
 #define IF_D(test, fmt, args...)
 #define dump_nla(nla, maxlen)

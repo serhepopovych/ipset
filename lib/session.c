@@ -1982,7 +1982,7 @@ build_msg(struct ipset_session *session, bool aggregate)
 		break;
 	case IPSET_CMD_ADD:
 	case IPSET_CMD_DEL: {
-		const struct ipset_type *type;
+		DD(const struct ipset_type *type);
 
 		if (!aggregate) {
 			/* Setname, type not checked/added yet */
@@ -2007,7 +2007,7 @@ build_msg(struct ipset_session *session, bool aggregate)
 				open_nested(session, nlh, IPSET_ATTR_ADT);
 			}
 		}
-		type = ipset_data_get(data, IPSET_OPT_TYPE);
+		DD(type = ipset_data_get(data, IPSET_OPT_TYPE));
 		D("family: %u, type family %u",
 		  ipset_data_family(data), type->family);
 		if (open_nested(session, nlh, IPSET_ATTR_DATA)) {
@@ -2027,7 +2027,7 @@ build_msg(struct ipset_session *session, bool aggregate)
 		break;
 	}
 	case IPSET_CMD_TEST: {
-		const struct ipset_type *type;
+		DD(const struct ipset_type *type);
 		/* Return codes are not aggregated, so tests cannot be either */
 
 		/* Setname, type not checked/added yet */
@@ -2040,7 +2040,7 @@ build_msg(struct ipset_session *session, bool aggregate)
 			return ipset_err(session,
 				"Invalid test command: missing settype");
 
-		type = ipset_data_get(data, IPSET_OPT_TYPE);
+		DD(type = ipset_data_get(data, IPSET_OPT_TYPE));
 		D("family: %u, type family %u",
 		  ipset_data_family(data), type->family);
 		ADDATTR_SETNAME(session, nlh, data);
