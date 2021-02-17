@@ -319,11 +319,11 @@ ipset_parse_port(struct ipset_session *session,
 	assert(opt == IPSET_OPT_PORT || opt == IPSET_OPT_PORT_TO);
 	assert(str);
 
-	if (parse_portname(session, str, &port, proto) == 0) {
+	if (string_to_u16(session, str, &port) == 0) {
 		return ipset_session_data_set(session, opt, &port);
 	}
 	/* Error is stored as warning in session report */
-	if (string_to_u16(session, str, &port) == 0) {
+	if (parse_portname(session, str, &port, proto) == 0) {
 		/* No error, so reset false error messages */
 		ipset_session_report_reset(session);
 		return ipset_session_data_set(session, opt, &port);
