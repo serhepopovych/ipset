@@ -63,6 +63,7 @@
 #@HAVE_GFP_KERNEL_ACCOUNT@ HAVE_GFP_KERNEL_ACCOUNT
 #@HAVE_NLA_STRSCPY@ HAVE_NLA_STRSCPY
 #@HAVE_NFNL_MSG_PUT@ HAVE_NFNL_MSG_PUT
+#@HAVE_NFNL_INFO_IN_NFNL_CALLBACK@ HAVE_NFNL_INFO_IN_NFNL_CALLBACK
 
 #ifdef HAVE_EXPORT_SYMBOL_GPL_IN_MODULE_H
 #include <linux/module.h>
@@ -349,18 +350,34 @@ static inline int nla_put_in6_addr(struct sk_buff *skb, int attrtype,
 }
 #endif
 
-#ifdef HAVE_PASSING_EXTENDED_ACK_TO_CALLBACKS
-#define IPSET_CBFN(fn, net, nl, skb, nlh, cda, e)	fn(net, nl, skb, nlh, cda, e)
-#define IPSET_CBFN_AD(fn, net, nl, skb, ad, nlh, cda, e) fn(net, nl, skb, ad, nlh, cda, e)
-#define IPSET_SOCK_NET(net, ctnl)			net
+#ifdef HAVE_NFNL_INFO_IN_NFNL_CALLBACK
+#define IPSET_CBFN(fn, net, nl, skb, nlh, cda, e, i)	fn(skb, i, cda)
+#define IPSET_CBFN_AD(fn, net, nl, skb, ad, nlh, cda, e, i) fn(net, nl, skb, ad, nlh, cda, i)
+#define IPSET_SOCK_NET(n, ctnl, i)			(i)->net
+#define INFO_NLH(i, n)					(i)->nlh
+#define INFO_NET(i, n)					(i)->net
+#define INFO_SK(i, n)					(i)->sk
+#elif defined(HAVE_PASSING_EXTENDED_ACK_TO_CALLBACKS)
+#define IPSET_CBFN(fn, net, nl, skb, nlh, cda, e, i)	fn(net, nl, skb, nlh, cda, e)
+#define IPSET_CBFN_AD(fn, net, nl, skb, ad, nlh, cda, e, i) fn(net, nl, skb, ad, nlh, cda, e)
+#define IPSET_SOCK_NET(net, ctnl, i)			net
+#define INFO_NLH(i, n)					n
+#define INFO_NET(i, n)					n
+#define INFO_SK(i, n)					n
 #elif defined(HAVE_NET_IN_NFNL_CALLBACK_FN)
-#define IPSET_CBFN(fn, net, nl, skb, nlh, cda, e)	fn(net, nl, skb, nlh, cda)
-#define IPSET_CBFN_AD(fn, net, nl, skb, ad, nlh, cda, e) fn(net, nl, skb, ad, nlh, cda)
-#define IPSET_SOCK_NET(net, ctnl)			net
+#define IPSET_CBFN(fn, net, nl, skb, nlh, cda, e, i)	fn(net, nl, skb, nlh, cda)
+#define IPSET_CBFN_AD(fn, net, nl, skb, ad, nlh, cda, e, i) fn(net, nl, skb, ad, nlh, cda)
+#define IPSET_SOCK_NET(net, ctnl, i)			net
+#define INFO_NLH(i, n)					n
+#define INFO_NET(i, n)					n
+#define INFO_SK(i, n)					n
 #else
-#define IPSET_CBFN(fn, net, nl, skb, nlh, cda, e)	fn(nl, skb, nlh, cda)
-#define IPSET_CBFN_AD(fn, net, nl, skb, ad, nlh, cda, e) fn(nl, skb, ad, nlh, cda)
-#define IPSET_SOCK_NET(net, ctnl)			sock_net(ctnl)
+#define IPSET_CBFN(fn, net, nl, skb, nlh, cda, e, i)	fn(nl, skb, nlh, cda)
+#define IPSET_CBFN_AD(fn, net, nl, skb, ad, nlh, cda, e, i) fn(nl, skb, ad, nlh, cda)
+#define IPSET_SOCK_NET(net, ctnl, i)			sock_net(ctnl)
+#define INFO_NLH(i, n)					n
+#define INFO_NET(i, n)					n
+#define INFO_SK(i, n)					n
 #endif
 
 #ifndef HAVE_TC_SKB_PROTOCOL
@@ -408,6 +425,7 @@ static inline u16 nfnl_msg_type(u8 subsys, u8 msg_type)
 #endif
 
 #ifndef HAVE_NFNL_MSG_PUT
+#include <linux/netfilter/nfnetlink.h>
 static inline void nfnl_fill_hdr(struct nlmsghdr *nlh, u8 family, u8 version,
 				 __be16 res_id)
 {

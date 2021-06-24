@@ -796,6 +796,16 @@ else
 	AC_SUBST(HAVE_NFNL_MSG_PUT, undef)
 fi
 
+AC_MSG_CHECKING([kernel source for struct nfnl_info in nfnl_callback function])
+if test -f $ksourcedir/include/linux/netfilter/nfnetlink.h && \
+   $AWK '/^struct nfnl_callback /,/^}/' $ksourcedir/include/linux/netfilter/nfnetlink.h | $GREP -q 'struct nfnl_info'; then
+	AC_MSG_RESULT(yes)
+	AC_SUBST(HAVE_NFNL_INFO_IN_NFNL_CALLBACK, define)
+else
+	AC_MSG_RESULT(no)
+	AC_SUBST(HAVE_NFNL_INFO_IN_NFNL_CALLBACK, undef)
+fi
+
 AC_MSG_CHECKING([kernel source for kvzalloc() in mm.h])
 if test -f $ksourcedir/include/linux/mm.h && \
    $GREP -q 'static inline void \*kvzalloc(' $ksourcedir/include/linux/mm.h; then
