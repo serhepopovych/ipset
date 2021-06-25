@@ -1231,7 +1231,7 @@ ipset_parser(struct ipset *ipset, int oargc, char *oargv[])
 			return ipset->custom_error(ipset,
 				p, IPSET_PARAMETER_PROBLEM,
 				"Unknown argument %s", argv[1]);
-		return restore(ipset);
+		return IPSET_CMD_RESTORE;
 	case IPSET_CMD_ADD:
 	case IPSET_CMD_DEL:
 	case IPSET_CMD_TEST:
@@ -1295,6 +1295,9 @@ ipset_parse_argv(struct ipset *ipset, int oargc, char *oargv[])
 	cmd = ipset_parser(ipset, oargc, oargv);
 	if (cmd < 0)
 		return cmd;
+
+	if (cmd == IPSET_CMD_RESTORE)
+		return restore(ipset);
 
 	ret = ipset_cmd(session, cmd, ipset->restore_line);
 	D("ret %d", ret);
