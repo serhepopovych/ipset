@@ -923,20 +923,8 @@ static const char *cmd_prefix[] = {
 	[IPSET_TEST]   = "test   SETNAME",
 };
 
-/* Workhorses */
-
-/**
- * ipset_parse_argv - parse and argv array and execute the command
- * @ipset: ipset structure
- * @argc: length of the array
- * @argv: array of strings
- *
- * Parse an array of strings and execute the ipset command.
- *
- * Returns 0 on success or a negative error code.
- */
-int
-ipset_parse_argv(struct ipset *ipset, int oargc, char *oargv[])
+static int
+ipset_parser(struct ipset *ipset, int oargc, char *oargv[])
 {
 	int ret = 0;
 	enum ipset_cmd cmd = IPSET_CMD_NONE;
@@ -1280,6 +1268,34 @@ ipset_parse_argv(struct ipset *ipset, int oargc, char *oargv[])
 	if (argc > 1)
 		return ipset->custom_error(ipset, p, IPSET_PARAMETER_PROBLEM,
 			"Unknown argument %s", argv[1]);
+
+	return cmd;
+}
+
+/* Workhorses */
+
+/**
+ * ipset_parse_argv - parse and argv array and execute the command
+ * @ipset: ipset structure
+ * @argc: length of the array
+ * @argv: array of strings
+ *
+ * Parse an array of strings and execute the ipset command.
+ *
+ * Returns 0 on success or a negative error code.
+ */
+int
+ipset_parse_argv(struct ipset *ipset, int oargc, char *oargv[])
+{
+	struct ipset_session *session = ipset->session;
+	void *p = ipset_session_printf_private(session);
+	enum ipset_cmd cmd;
+	int ret;
+
+	cmd = ipset_parser(ipset, oargc, oargv);
+	if (cmd < 0)
+		return cmd;
+
 	ret = ipset_cmd(session, cmd, ipset->restore_line);
 	D("ret %d", ret);
 	/* In the case of warning, the return code is success */
