@@ -13,6 +13,7 @@
 #include <stdio.h>				/* printf */
 #include <stdlib.h>				/* exit */
 #include <string.h>				/* str* */
+#include <inttypes.h>				/* PRIu64 */
 
 #include <config.h>
 
@@ -28,6 +29,7 @@
 #include <libipset/utils.h>			/* STREQ */
 #include <libipset/ipset.h>			/* prototypes */
 #include <libipset/ip_set_compiler.h>		/* compiler attributes */
+#include <libipset/list_sort.h>			/* lists */
 
 static char program_name[] = PACKAGE;
 static char program_version[] = PACKAGE_VERSION;
@@ -50,6 +52,17 @@ struct ipset {
 	char *newargv[MAX_ARGS];
 	int newargc;
 	const char *filename;			/* Input/output filename */
+	bool xlate;
+	struct list_head xlate_sets;
+};
+
+struct ipset_xlate_set {
+	struct list_head list;
+	char name[IPSET_MAXNAMELEN];
+	uint8_t netmask;
+	uint8_t family;
+	bool interval;
+	const struct ipset_type *type;
 };
 
 /* Commands and environment options */
@@ -923,6 +936,31 @@ static const char *cmd_prefix[] = {
 	[IPSET_TEST]   = "test   SETNAME",
 };
 
+static const struct ipset_xlate_set *
+ipset_xlate_set_get(struct ipset *ipset, const char *name)
+{
+	const struct ipset_xlate_set *set;
+
+	list_for_each_entry(set, &ipset->xlate_sets, list) {
+		if (!strcmp(set->name, name))
+			return set;
+	}
+
+	return NULL;
+}
+
+static const struct ipset_type *ipset_xlate_type_get(struct ipset *ipset,
+						     const char *name)
+{
+	const struct ipset_xlate_set *set;
+
+	set = ipset_xlate_set_get(ipset, name);
+	if (!set)
+		return NULL;
+
+	return set->type;
+}
+
 static int
 ipset_parser(struct ipset *ipset, int oargc, char *oargv[])
 {
@@ -1241,7 +1279,12 @@ ipset_parser(struct ipset *ipset, int oargc, char *oargv[])
 		if (ret < 0)
 			return ipset->standard_error(ipset, p);
 
-		type = ipset_type_get(session, cmd);
+		if (!ipset->xlate) {
+			type = ipset_type_get(session, cmd);
+		} else {
+			type = ipset_xlate_type_get(ipset, arg0);
+			ipset_session_data_set(session, IPSET_OPT_TYPE, type);
+		}
 		if (type == NULL)
 			return ipset->standard_error(ipset, p);
 
@@ -1474,6 +1517,9 @@ ipset_init(void)
 		return NULL;
 	}
 	ipset_custom_printf(ipset, NULL, NULL, NULL, NULL);
+
+	INIT_LIST_HEAD(&ipset->xlate_sets);
+
 	return ipset;
 }
 
@@ -1488,6 +1534,8 @@ ipset_init(void)
 int
 ipset_fini(struct ipset *ipset)
 {
+	struct ipset_xlate_set *xlate_set, *next;
+
 	assert(ipset);
 
 	if (ipset->session)
@@ -1496,6 +1544,497 @@ ipset_fini(struct ipset *ipset)
 	if (ipset->newargv[0])
 		free(ipset->newargv[0]);
 
+	list_for_each_entry_safe(xlate_set, next, &ipset->xlate_sets, list)
+		free(xlate_set);
+
 	free(ipset);
 	return 0;
+}
+
+/* Ignore the set family, use inet. */
+static const char *ipset_xlate_family(uint8_t family)
+{
+	return "inet";
+}
+
+enum ipset_xlate_set_type {
+	IPSET_XLATE_TYPE_UNKNOWN	= 0,
+	IPSET_XLATE_TYPE_HASH_MAC,
+	IPSET_XLATE_TYPE_HASH_IP,
+	IPSET_XLATE_TYPE_HASH_IP_MAC,
+	IPSET_XLATE_TYPE_HASH_NET_IFACE,
+	IPSET_XLATE_TYPE_HASH_NET_PORT,
+	IPSET_XLATE_TYPE_HASH_NET_PORT_NET,
+	IPSET_XLATE_TYPE_HASH_NET_NET,
+	IPSET_XLATE_TYPE_HASH_NET,
+	IPSET_XLATE_TYPE_HASH_IP_PORT_NET,
+	IPSET_XLATE_TYPE_HASH_IP_PORT_IP,
+	IPSET_XLATE_TYPE_HASH_IP_MARK,
+	IPSET_XLATE_TYPE_HASH_IP_PORT,
+	IPSET_XLATE_TYPE_BITMAP_PORT,
+	IPSET_XLATE_TYPE_BITMAP_IP_MAC,
+	IPSET_XLATE_TYPE_BITMAP_IP,
+};
+
+static enum ipset_xlate_set_type ipset_xlate_set_type(const char *typename)
+{
+	if (!strcmp(typename, "hash:mac"))
+		return IPSET_XLATE_TYPE_HASH_MAC;
+	else if (!strcmp(typename, "hash:ip"))
+		return IPSET_XLATE_TYPE_HASH_IP;
+	else if (!strcmp(typename, "hash:ip,mac"))
+		return IPSET_XLATE_TYPE_HASH_IP_MAC;
+	else if (!strcmp(typename, "hash:net,iface"))
+		return IPSET_XLATE_TYPE_HASH_NET_IFACE;
+	else if (!strcmp(typename, "hash:net,port"))
+		return IPSET_XLATE_TYPE_HASH_NET_PORT;
+	else if (!strcmp(typename, "hash:net,port,net"))
+		return IPSET_XLATE_TYPE_HASH_NET_PORT_NET;
+	else if (!strcmp(typename, "hash:net,net"))
+		return IPSET_XLATE_TYPE_HASH_NET_NET;
+	else if (!strcmp(typename, "hash:net"))
+		return IPSET_XLATE_TYPE_HASH_NET;
+	else if (!strcmp(typename, "hash:ip,port,net"))
+		return IPSET_XLATE_TYPE_HASH_IP_PORT_NET;
+	else if (!strcmp(typename, "hash:ip,port,ip"))
+		return IPSET_XLATE_TYPE_HASH_IP_PORT_IP;
+	else if (!strcmp(typename, "hash:ip,mark"))
+		return IPSET_XLATE_TYPE_HASH_IP_MARK;
+	else if (!strcmp(typename, "hash:ip,port"))
+		return IPSET_XLATE_TYPE_HASH_IP_PORT;
+	else if (!strcmp(typename, "hash:ip"))
+		return IPSET_XLATE_TYPE_HASH_IP;
+	else if (!strcmp(typename, "bitmap:port"))
+		return IPSET_XLATE_TYPE_BITMAP_PORT;
+	else if (!strcmp(typename, "bitmap:ip,mac"))
+		return IPSET_XLATE_TYPE_BITMAP_IP_MAC;
+	else if (!strcmp(typename, "bitmap:ip"))
+		return IPSET_XLATE_TYPE_BITMAP_IP;
+
+	return IPSET_XLATE_TYPE_UNKNOWN;
+}
+
+#define NFT_SET_INTERVAL	(1 << 0)
+
+static const char *
+ipset_xlate_type_to_nftables(int family, enum ipset_xlate_set_type type,
+			     uint32_t *flags)
+{
+	switch (type) {
+	case IPSET_XLATE_TYPE_HASH_MAC:
+		return "ether_addr";
+	case IPSET_XLATE_TYPE_HASH_IP:
+		if (family == AF_INET)
+			return "ipv4_addr";
+		else if (family == AF_INET6)
+			return "ipv6_addr";
+		break;
+	case IPSET_XLATE_TYPE_HASH_IP_MAC:
+		if (family == AF_INET)
+			return "ipv4_addr . ether_addr";
+		else if (family == AF_INET6)
+			return "ipv6_addr . ether_addr";
+		break;
+	case IPSET_XLATE_TYPE_HASH_NET_IFACE:
+		*flags |= NFT_SET_INTERVAL;
+		if (family == AF_INET)
+			return "ipv4_addr . ifname";
+		else if (family == AF_INET6)
+			return "ipv6_addr . ifname";
+		break;
+	case IPSET_XLATE_TYPE_HASH_NET_PORT:
+		*flags |= NFT_SET_INTERVAL;
+		if (family == AF_INET)
+			return "ipv4_addr . inet_proto . inet_service";
+		else if (family == AF_INET6)
+			return "ipv6_addr . inet_proto . inet_service";
+		break;
+	case IPSET_XLATE_TYPE_HASH_NET_PORT_NET:
+		*flags |= NFT_SET_INTERVAL;
+		if (family == AF_INET)
+			return "ipv4_addr . inet_proto . inet_service . ipv4_addr";
+		else if (family == AF_INET6)
+			return "ipv6_addr . inet_proto . inet_service . ipv6_addr";
+		break;
+	case IPSET_XLATE_TYPE_HASH_NET_NET:
+		*flags |= NFT_SET_INTERVAL;
+		if (family == AF_INET)
+			return "ipv4_addr . ipv4_addr";
+		else if (family == AF_INET6)
+			return "ipv6_addr . ipv6_addr";
+		break;
+	case IPSET_XLATE_TYPE_HASH_NET:
+		*flags |= NFT_SET_INTERVAL;
+		if (family == AF_INET)
+			return "ipv4_addr";
+		else if (family == AF_INET6)
+			return "ipv6_addr";
+		break;
+	case IPSET_XLATE_TYPE_HASH_IP_PORT_NET:
+		*flags |= NFT_SET_INTERVAL;
+		if (family == AF_INET)
+			return "ipv4_addr . inet_proto . inet_service . ipv4_addr";
+		else if (family == AF_INET6)
+			return "ipv6_addr . inet_proto . inet_service . ipv6_addr";
+		break;
+	case IPSET_XLATE_TYPE_HASH_IP_PORT_IP:
+		if (family == AF_INET)
+			return "ipv4_addr . inet_proto . inet_service . ipv4_addr";
+		else if (family == AF_INET6)
+			return "ipv6_addr . inet_proto . inet_service . ipv6_addr";
+		break;
+	case IPSET_XLATE_TYPE_HASH_IP_MARK:
+		if (family == AF_INET)
+			return "ipv4_addr . mark";
+		else if (family == AF_INET6)
+			return "ipv6_addr . mark";
+		break;
+	case IPSET_XLATE_TYPE_HASH_IP_PORT:
+		if (family == AF_INET)
+			return "ipv4_addr . inet_proto . inet_service";
+		else if (family == AF_INET6)
+			return "ipv6_addr . inet_proto . inet_service";
+		break;
+	case IPSET_XLATE_TYPE_BITMAP_PORT:
+		return "inet_service";
+	case IPSET_XLATE_TYPE_BITMAP_IP_MAC:
+		if (family == AF_INET)
+			return "ipv4_addr . ether_addr";
+		else if (family == AF_INET6)
+			return "ipv6_addr . ether_addr";
+		break;
+	case IPSET_XLATE_TYPE_BITMAP_IP:
+		if (family == AF_INET)
+			return "ipv4_addr";
+		else if (family == AF_INET6)
+			return "ipv6_addr";
+		break;
+	}
+	/* This should not ever happen. */
+	return "unknown";
+}
+
+static int ipset_xlate(struct ipset *ipset, enum ipset_cmd cmd,
+		       const char *table)
+{
+	const char *set, *typename, *nft_type;
+	const struct ipset_type *ipset_type;
+	struct ipset_xlate_set *xlate_set;
+	enum ipset_xlate_set_type type;
+	struct ipset_session *session;
+	const uint32_t *cadt_flags;
+	const uint32_t *timeout;
+	const uint32_t *maxelem;
+	struct ipset_data *data;
+	const uint8_t *netmask;
+	const char *comment;
+	uint32_t flags = 0;
+	uint8_t family;
+	char buf[64];
+	bool concat;
+	char *term;
+	int i;
+
+	session = ipset_session(ipset);
+	data = ipset_session_data(session);
+
+	set = ipset_data_get(data, IPSET_SETNAME);
+	family = ipset_data_family(data);
+
+	switch (cmd) {
+	case IPSET_CMD_CREATE:
+		/* Not supported. */
+		if (ipset_data_test(data, IPSET_OPT_MARKMASK)) {
+			printf("# %s", ipset->cmdline);
+			break;
+		}
+		cadt_flags = ipset_data_get(data, IPSET_OPT_CADT_FLAGS);
+
+		/* Ignore:
+		 * - IPSET_FLAG_WITH_COMMENT
+		 * - IPSET_FLAG_WITH_FORCEADD
+		 */
+		if (cadt_flags &&
+		    (*cadt_flags & (IPSET_FLAG_BEFORE |
+				   IPSET_FLAG_PHYSDEV |
+				   IPSET_FLAG_NOMATCH |
+				   IPSET_FLAG_WITH_SKBINFO |
+				   IPSET_FLAG_IFACE_WILDCARD))) {
+			printf("# %s", ipset->cmdline);
+			break;
+		}
+
+		typename = ipset_data_get(data, IPSET_OPT_TYPENAME);
+		type = ipset_xlate_set_type(typename);
+		nft_type = ipset_xlate_type_to_nftables(family, type, &flags);
+
+		printf("add set %s %s %s { type %s; ",
+		       ipset_xlate_family(family), table, set, nft_type);
+		if (cadt_flags) {
+			if (*cadt_flags & IPSET_FLAG_WITH_COUNTERS)
+				printf("counter; ");
+		}
+		timeout = ipset_data_get(data, IPSET_OPT_TIMEOUT);
+		if (timeout)
+			printf("timeout %us; ", *timeout);
+		maxelem = ipset_data_get(data, IPSET_OPT_MAXELEM);
+		if (maxelem)
+			printf("size %u; ", *maxelem);
+
+		netmask = ipset_data_get(data, IPSET_OPT_NETMASK);
+		if (netmask &&
+		    ((family == AF_INET && *netmask < 32) ||
+		     (family == AF_INET6 && *netmask < 128)))
+			flags |= NFT_SET_INTERVAL;
+
+		if (flags & NFT_SET_INTERVAL)
+			printf("flags interval; ");
+
+		/* These create-specific options are safe to be ignored:
+		 * - IPSET_OPT_GC
+		 * - IPSET_OPT_HASHSIZE
+		 * - IPSET_OPT_PROBES
+		 * - IPSET_OPT_RESIZE
+		 * - IPSET_OPT_SIZE
+		 * - IPSET_OPT_FORCEADD
+		 *
+		 * Ranges and CIDR are safe to be ignored too:
+		 * - IPSET_OPT_IP_FROM
+		 * - IPSET_OPT_IP_TO
+		 * - IPSET_OPT_PORT_FROM
+		 * - IPSET_OPT_PORT_TO
+		 */
+
+		printf("}\n");
+
+		xlate_set = calloc(1, sizeof(*xlate_set));
+		if (!xlate_set)
+			return -1;
+
+		snprintf(xlate_set->name, sizeof(xlate_set->name), "%s", set);
+		ipset_type = ipset_types();
+		while (ipset_type) {
+			if (!strcmp(ipset_type->name, typename))
+				break;
+			ipset_type = ipset_type->next;
+		}
+
+		xlate_set->family = family;
+		xlate_set->type = ipset_type;
+		if (netmask) {
+			xlate_set->netmask = *netmask;
+			xlate_set->interval = true;
+		}
+		list_add_tail(&xlate_set->list, &ipset->xlate_sets);
+		break;
+	case IPSET_CMD_DESTROY:
+		printf("del set %s %s %s\n",
+		       ipset_xlate_family(family), table, set);
+		break;
+	case IPSET_CMD_FLUSH:
+		if (!set) {
+			printf("# %s", ipset->cmdline);
+		} else {
+			printf("flush set %s %s %s\n",
+			       ipset_xlate_family(family), table, set);
+		}
+		break;
+	case IPSET_CMD_RENAME:
+		printf("# %s", ipset->cmdline);
+		return -1;
+	case IPSET_CMD_SWAP:
+		printf("# %s", ipset->cmdline);
+		return -1;
+	case IPSET_CMD_LIST:
+		if (!set) {
+			printf("list sets %s\n",
+			       ipset_xlate_family(family), table);
+		} else {
+			printf("list set %s %s %s\n",
+			       ipset_xlate_family(family), table, set);
+		}
+		break;
+	case IPSET_CMD_SAVE:
+		printf("# %s", ipset->cmdline);
+		return -1;
+	case IPSET_CMD_ADD:
+	case IPSET_CMD_DEL:
+	case IPSET_CMD_TEST:
+		/* Not supported. */
+		if (ipset_data_test(data, IPSET_OPT_NOMATCH) ||
+		    ipset_data_test(data, IPSET_OPT_SKBINFO) ||
+		    ipset_data_test(data, IPSET_OPT_SKBMARK) ||
+		    ipset_data_test(data, IPSET_OPT_SKBPRIO) ||
+		    ipset_data_test(data, IPSET_OPT_SKBQUEUE) ||
+		    ipset_data_test(data, IPSET_OPT_IFACE_WILDCARD)) {
+			printf("# %s", ipset->cmdline);
+			break;
+		}
+		printf("%s element %s %s %s { ",
+		       cmd == IPSET_CMD_ADD ? "add" :
+				cmd == IPSET_CMD_DEL ? "delete" : "get",
+		       ipset_xlate_family(family), table, set);
+
+		typename = ipset_data_get(data, IPSET_OPT_TYPENAME);
+		type = ipset_xlate_set_type(typename);
+
+		xlate_set = (struct ipset_xlate_set *)
+				ipset_xlate_set_get(ipset, set);
+		if (xlate_set && xlate_set->interval)
+			netmask = &xlate_set->netmask;
+		else
+			netmask = NULL;
+
+		concat = false;
+		if (ipset_data_test(data, IPSET_OPT_IP)) {
+			ipset_print_data(buf, sizeof(buf), data, IPSET_OPT_IP, 0);
+			printf("%s", buf);
+			if (netmask)
+				printf("/%u ", *netmask);
+			else
+				printf(" ");
+
+			concat = true;
+		}
+		if (ipset_data_test(data, IPSET_OPT_MARK)) {
+			ipset_print_mark(buf, sizeof(buf), data, IPSET_OPT_MARK, 0);
+			printf("%s%s ", concat ? ". " : "", buf);
+		}
+		if (ipset_data_test(data, IPSET_OPT_IFACE)) {
+			ipset_print_data(buf, sizeof(buf), data, IPSET_OPT_IFACE, 0);
+			printf("%s%s ", concat ? ". " : "", buf);
+		}
+		if (ipset_data_test(data, IPSET_OPT_ETHER)) {
+			ipset_print_ether(buf, sizeof(buf), data, IPSET_OPT_ETHER, 0);
+			for (i = 0; i < strlen(buf); i++)
+				buf[i] = tolower(buf[i]);
+
+			printf("%s%s ", concat ? ". " : "", buf);
+			concat = true;
+		}
+		if (ipset_data_test(data, IPSET_OPT_PORT)) {
+			ipset_print_proto_port(buf, sizeof(buf), data, IPSET_OPT_PORT, 0);
+			term = strchr(buf, ':');
+			if (term) {
+				*term = '\0';
+				printf("%s%s ", concat ? ". " : "", buf);
+			}
+			ipset_print_data(buf, sizeof(buf), data, IPSET_OPT_PORT, 0);
+			printf("%s%s ", concat ? ". " : "", buf);
+		}
+		if (ipset_data_test(data, IPSET_OPT_IP2)) {
+			ipset_print_ip(buf, sizeof(buf), data, IPSET_OPT_IP2, 0);
+			printf("%s%s", concat ? ". " : "", buf);
+			if (netmask)
+				printf("/%u ", *netmask);
+			else
+				printf(" ");
+		}
+		if (ipset_data_test(data, IPSET_OPT_PACKETS) &&
+		    ipset_data_test(data, IPSET_OPT_BYTES)) {
+			const uint64_t *pkts, *bytes;
+
+			pkts = ipset_data_get(data, IPSET_OPT_PACKETS);
+			bytes = ipset_data_get(data, IPSET_OPT_BYTES);
+
+			printf("counter packets %" PRIu64 " bytes %" PRIu64 " ",
+			       *pkts, *bytes);
+		}
+		timeout = ipset_data_get(data, IPSET_OPT_TIMEOUT);
+		if (timeout)
+			printf("timeout %us ", *timeout);
+
+		comment = ipset_data_get(data, IPSET_OPT_ADT_COMMENT);
+		if (comment)
+			printf("comment \"%s\" ", comment);
+
+		printf("}\n");
+		break;
+	case IPSET_CMD_GET_BYNAME:
+		printf("# %s", ipset->cmdline);
+		return -1;
+	case IPSET_CMD_GET_BYINDEX:
+		printf("# %s", ipset->cmdline);
+		return -1;
+	default:
+		break;
+	}
+
+	return 0;
+}
+
+static int ipset_xlate_restore(struct ipset *ipset)
+{
+	struct ipset_session *session = ipset_session(ipset);
+	struct ipset_data *data = ipset_session_data(session);
+	void *p = ipset_session_printf_private(session);
+	const char *filename;
+	enum ipset_cmd cmd;
+	FILE *f = stdin;
+	int ret = 0;
+	char *c;
+
+	if (ipset->filename) {
+		f = fopen(ipset->filename, "r");
+		if (!f) {
+			fprintf(stderr, "cannot open file `%s'\n", filename);
+			return -1;
+		}
+	}
+
+	/* TODO: Allow to specify the table name other than 'global'. */
+	printf("add table inet global\n");
+
+	while (fgets(ipset->cmdline, sizeof(ipset->cmdline), f)) {
+		ipset->restore_line++;
+		c = ipset->cmdline;
+		while (isspace(c[0]))
+			c++;
+		if (c[0] == '\0' || c[0] == '#')
+			continue;
+		else if (STREQ(c, "COMMIT\n") || STREQ(c, "COMMIT\r\n"))
+			continue;
+
+		ret = build_argv(ipset, c);
+		if (ret < 0)
+			return ret;
+
+		cmd = ipset_parser(ipset, ipset->newargc, ipset->newargv);
+		if (cmd < 0)
+			ipset->standard_error(ipset, p);
+
+		/* TODO: Allow to specify the table name other than 'global'. */
+		ret = ipset_xlate(ipset, cmd, "global");
+		if (ret < 0)
+			break;
+
+		ipset_data_reset(data);
+	}
+
+	if (filename)
+		fclose(f);
+
+	return ret;
+}
+
+int ipset_xlate_argv(struct ipset *ipset, int argc, char *argv[])
+{
+	enum ipset_cmd cmd;
+	int ret;
+
+	ipset->xlate = true;
+
+	cmd = ipset_parser(ipset, argc, argv);
+	if (cmd < 0)
+		return cmd;
+
+	if (cmd == IPSET_CMD_RESTORE) {
+		ret = ipset_xlate_restore(ipset);
+	} else {
+		fprintf(stderr, "This command is not supported, "
+				"use `ipset-translate restore < file'\n");
+		ret = -1;
+	}
+
+	return ret;
 }

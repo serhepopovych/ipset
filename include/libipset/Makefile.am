@@ -17,6 +17,7 @@ pkginclude_HEADERS = \
 	transport.h \
 	types.h \
 	ipset.h \
-	utils.h
+	utils.h \
+	xlate.h
 
 EXTRA_DIST = debug.h icmp.h icmpv6.h

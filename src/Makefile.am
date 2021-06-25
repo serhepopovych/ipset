@@ -12,10 +12,16 @@ AM_LDFLAGS	= -static
 endif
 endif
 
-dist_man_MANS = ipset.8
+dist_man_MANS = ipset.8 ipset-translate.8
 
 sparse-check: $(ipset_SOURCES:.c=.d)
 
 %.d: %.c
 	$(IPSET_AM_V_CHECK)\
 	$(SPARSE) -I.. $(SPARSE_FLAGS) $(AM_CFLAGS) $(AM_CPPFLAGS) $< || :
+
+install-exec-hook:
+	${LN_S} -f "${sbindir}/ipset" "${DESTDIR}${sbindir}/ipset-translate";
+
+uninstall-hook:
+	rm -f ${DESTDIR}${sbindir}/ipset-translate

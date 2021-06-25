@@ -7,6 +7,7 @@ AC_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE([foreign subdir-objects tar-pax])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
+AC_PROG_LN_S
 AC_ENABLE_STATIC
 LT_INIT([dlopen])
 LT_CONFIG_LTDL_DIR([libltdl])
