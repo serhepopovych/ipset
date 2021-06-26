@@ -786,6 +786,16 @@ else
 	AC_SUBST(HAVE_NLA_POLICY_EXACT_LEN, undef)
 fi
 
+AC_MSG_CHECKING([kernel source for nfnl_msg_put() in nfnetlink.h])
+if test -f $ksourcedir/include/linux/netfilter/nfnetlink.h && \
+   $GREP -q 'nfnl_msg_put' $ksourcedir/include/linux/netfilter/nfnetlink.h; then
+	AC_MSG_RESULT(yes)
+	AC_SUBST(HAVE_NFNL_MSG_PUT, define)
+else
+	AC_MSG_RESULT(no)
+	AC_SUBST(HAVE_NFNL_MSG_PUT, undef)
+fi
+
 AC_MSG_CHECKING([kernel source for kvzalloc() in mm.h])
 if test -f $ksourcedir/include/linux/mm.h && \
    $GREP -q 'static inline void \*kvzalloc(' $ksourcedir/include/linux/mm.h; then
