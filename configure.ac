@@ -806,6 +806,16 @@ else
 	AC_SUBST(HAVE_NFNL_INFO_IN_NFNL_CALLBACK, undef)
 fi
 
+AC_MSG_CHECKING([kernel source for enum nfnl_callback_type])
+if test -f $ksourcedir/include/linux/netfilter/nfnetlink.h && \
+   $GREP -q 'enum nfnl_callback_type ' $ksourcedir/include/linux/netfilter/nfnetlink.h; then
+	AC_MSG_RESULT(yes)
+	AC_SUBST(HAVE_NFNL_CALLBACK_TYPE, define)
+else
+	AC_MSG_RESULT(no)
+	AC_SUBST(HAVE_NFNL_CALLBACK_TYPE, undef)
+fi
+
 AC_MSG_CHECKING([kernel source for kvzalloc() in mm.h])
 if test -f $ksourcedir/include/linux/mm.h && \
    $GREP -q 'static inline void \*kvzalloc(' $ksourcedir/include/linux/mm.h; then

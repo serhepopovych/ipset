@@ -64,6 +64,7 @@
 #@HAVE_NLA_STRSCPY@ HAVE_NLA_STRSCPY
 #@HAVE_NFNL_MSG_PUT@ HAVE_NFNL_MSG_PUT
 #@HAVE_NFNL_INFO_IN_NFNL_CALLBACK@ HAVE_NFNL_INFO_IN_NFNL_CALLBACK
+#@HAVE_NFNL_CALLBACK_TYPE@ HAVE_NFNL_CALLBACK_TYPE
 
 #ifdef HAVE_EXPORT_SYMBOL_GPL_IN_MODULE_H
 #include <linux/module.h>
@@ -378,6 +379,12 @@ static inline int nla_put_in6_addr(struct sk_buff *skb, int attrtype,
 #define INFO_NLH(i, n)					n
 #define INFO_NET(i, n)					n
 #define INFO_SK(i, n)					n
+#endif
+
+#ifdef HAVE_NFNL_CALLBACK_TYPE
+#define SET_NFNL_CALLBACK_TYPE(t) 	.type = t,
+#else
+#define SET_NFNL_CALLBACK_TYPE(t)
 #endif
 
 #ifndef HAVE_TC_SKB_PROTOCOL
