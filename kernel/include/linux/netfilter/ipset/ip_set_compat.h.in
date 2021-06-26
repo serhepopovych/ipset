@@ -65,6 +65,8 @@
 #@HAVE_NFNL_MSG_PUT@ HAVE_NFNL_MSG_PUT
 #@HAVE_NFNL_INFO_IN_NFNL_CALLBACK@ HAVE_NFNL_INFO_IN_NFNL_CALLBACK
 #@HAVE_NFNL_CALLBACK_TYPE@ HAVE_NFNL_CALLBACK_TYPE
+#@HAVE_EAGAIN_IN_NFNETLINK_UNICAST@ HAVE_EAGAIN_IN_NFNETLINK_UNICAST
+#@HAVE_NLMSG_UNICAST@ HAVE_NLMSG_UNICAST
 
 #ifdef HAVE_EXPORT_SYMBOL_GPL_IN_MODULE_H
 #include <linux/module.h>
@@ -358,6 +360,7 @@ static inline int nla_put_in6_addr(struct sk_buff *skb, int attrtype,
 #define INFO_NLH(i, n)					(i)->nlh
 #define INFO_NET(i, n)					(i)->net
 #define INFO_SK(i, n)					(i)->sk
+#define CALL_AD(net, ctnl, skb, set, tb, adt, flags, l)	call_ad(net, ctnl, skb, set, tb, adt, flags, l)
 #elif defined(HAVE_PASSING_EXTENDED_ACK_TO_CALLBACKS)
 #define IPSET_CBFN(fn, net, nl, skb, nlh, cda, e, i)	fn(net, nl, skb, nlh, cda, e)
 #define IPSET_CBFN_AD(fn, net, nl, skb, ad, nlh, cda, e, i) fn(net, nl, skb, ad, nlh, cda, e)
@@ -365,6 +368,7 @@ static inline int nla_put_in6_addr(struct sk_buff *skb, int attrtype,
 #define INFO_NLH(i, n)					n
 #define INFO_NET(i, n)					n
 #define INFO_SK(i, n)					n
+#define CALL_AD(net, ctnl, skb, set, tb, adt, flags, l)	call_ad(net, ctnl, skb, set, tb, adt, flags, l)
 #elif defined(HAVE_NET_IN_NFNL_CALLBACK_FN)
 #define IPSET_CBFN(fn, net, nl, skb, nlh, cda, e, i)	fn(net, nl, skb, nlh, cda)
 #define IPSET_CBFN_AD(fn, net, nl, skb, ad, nlh, cda, e, i) fn(net, nl, skb, ad, nlh, cda)
@@ -372,6 +376,7 @@ static inline int nla_put_in6_addr(struct sk_buff *skb, int attrtype,
 #define INFO_NLH(i, n)					n
 #define INFO_NET(i, n)					n
 #define INFO_SK(i, n)					n
+#define CALL_AD(net, ctnl, skb, set, tb, adt, flags, l)	call_ad(net, ctnl, skb, set, tb, adt, flags, l)
 #else
 #define IPSET_CBFN(fn, net, nl, skb, nlh, cda, e, i)	fn(nl, skb, nlh, cda)
 #define IPSET_CBFN_AD(fn, net, nl, skb, ad, nlh, cda, e, i) fn(nl, skb, ad, nlh, cda)
@@ -379,6 +384,7 @@ static inline int nla_put_in6_addr(struct sk_buff *skb, int attrtype,
 #define INFO_NLH(i, n)					n
 #define INFO_NET(i, n)					n
 #define INFO_SK(i, n)					n
+#define CALL_AD(net, ctnl, skb, set, tb, adt, flags, l)	call_ad(ctnl, skb, set, tb, adt, flags, l)
 #endif
 
 #ifdef HAVE_NFNL_CALLBACK_TYPE
@@ -512,6 +518,23 @@ static inline ssize_t strscpy(char * dest, const char * src, size_t count)
 
 #ifndef HAVE_NLA_STRSCPY
 #define nla_strscpy	nla_strlcpy
+#endif
+
+#if !defined(HAVE_EAGAIN_IN_NFNETLINK_UNICAST) || !defined(HAVE_NLMSG_UNICAST)
+#define NFNETLINK_UNICAST(cntl, skb, net, portid)	ipset_nfnetlink_unicast(cntl, skb, portid)
+static inline int ipset_nfnetlink_unicast(struct sock *ctnl, struct sk_buff *skb, u32 portid)
+{
+	int err = netlink_unicast(ctnl, skb,  portid, MSG_DONTWAIT);
+
+	if (err > 0)
+		err = 0;
+	if (err == -EAGAIN)
+		err = -ENOBUFS;
+
+	return err;
+}
+#else
+#define NFNETLINK_UNICAST(cntl, skb, net, portid)	nfnetlink_unicast(skb, net, portid)
 #endif
 
 #ifndef smp_mb__before_atomic

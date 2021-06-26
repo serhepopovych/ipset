@@ -816,6 +816,26 @@ else
 	AC_SUBST(HAVE_NFNL_CALLBACK_TYPE, undef)
 fi
 
+AC_MSG_CHECKING([kernel source of handling -EAGAIN in nfnetlink_unicast])
+if test -f $ksourcedir/net/netfilter/nfnetlink.c && \
+   $AWK '/nfnetlink_unicast\(/,/^}/' $ksourcedir/net/netfilter/nfnetlink.c | $GREP -q 'err == -EAGAIN'; then
+	AC_MSG_RESULT(yes)
+	AC_SUBST(HAVE_EAGAIN_IN_NFNETLINK_UNICAST, define)
+else
+	AC_MSG_RESULT(no)
+	AC_SUBST(HAVE_EAGAIN_IN_NFNETLINK_UNICAST, undef)
+fi
+
+AC_MSG_CHECKING([kernel source for nlmsg_unicast which returns zero in case of success])
+if test -f $ksourcedir/include/net/netlink.h && \
+   $AWK '/static inline int nlmsg_unicast\(/,/^}/' $ksourcedir/include/net/netlink.h | $GREP -q 'err > 0'; then
+	AC_MSG_RESULT(yes)
+	AC_SUBST(HAVE_NLMSG_UNICAST, define)
+else
+	AC_MSG_RESULT(no)
+	AC_SUBST(HAVE_NLMSG_UNICAST, undef)
+fi
+
 AC_MSG_CHECKING([kernel source for kvzalloc() in mm.h])
 if test -f $ksourcedir/include/linux/mm.h && \
    $GREP -q 'static inline void \*kvzalloc(' $ksourcedir/include/linux/mm.h; then
