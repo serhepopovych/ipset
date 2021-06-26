@@ -41,6 +41,9 @@
 #define syntax_err(fmt, args...) \
 	ipset_err(session, "Syntax error: " fmt , ## args)
 
+#define syntax_err_ll(errtype, fmt, args...) \
+	ipset_session_report(session, errtype, "Syntax error: " fmt , ## args)
+
 static char *
 ipset_strchr(const char *str, const char *sep)
 {
@@ -87,7 +90,8 @@ string_to_number_ll(struct ipset_session *session,
 		    const char *str,
 		    unsigned long long min,
 		    unsigned long long max,
-		    unsigned long long *ret)
+		    unsigned long long *ret,
+		    enum ipset_err_type errtype)
 {
 	unsigned long long number = 0;
 	char *end;
@@ -104,13 +108,13 @@ string_to_number_ll(struct ipset_session *session,
 			errno = ERANGE;
 	}
 	if (errno == ERANGE && max)
-		return syntax_err("'%s' is out of range %llu-%llu",
-				  str, min, max);
+		return syntax_err_ll(errtype, "'%s' is out of range %llu-%llu",
+				     str, min, max);
 	else if (errno == ERANGE)
-		return syntax_err("'%s' is out of range %llu-%llu",
-				  str, min, ULLONG_MAX);
+		return syntax_err_ll(errtype, "'%s' is out of range %llu-%llu",
+				     str, min, ULLONG_MAX);
 	else
-		return syntax_err("'%s' is invalid as number", str);
+		return syntax_err_ll(errtype, "'%s' is invalid as number", str);
 }
 
 static int
@@ -120,7 +124,7 @@ string_to_u8(struct ipset_session *session,
 	int err;
 	unsigned long long num = 0;
 
-	err = string_to_number_ll(session, str, 0, 255, &num);
+	err = string_to_number_ll(session, str, 0, 255, &num, IPSET_ERROR);
 	*ret = num;
 
 	return err;
@@ -141,12 +145,13 @@ string_to_cidr(struct ipset_session *session,
 
 static int
 string_to_u16(struct ipset_session *session,
-	      const char *str, uint16_t *ret)
+	      const char *str, uint16_t *ret,
+	      enum ipset_err_type errtype)
 {
 	int err;
 	unsigned long long num = 0;
 
-	err = string_to_number_ll(session, str, 0, USHRT_MAX, &num);
+	err = string_to_number_ll(session, str, 0, USHRT_MAX, &num, errtype);
 	*ret = num;
 
 	return err;
@@ -159,7 +164,8 @@ string_to_u32(struct ipset_session *session,
 	int err;
 	unsigned long long num = 0;
 
-	err = string_to_number_ll(session, str, 0, UINT_MAX, &num);
+	err = string_to_number_ll(session, str, 0, UINT_MAX, &num,
+				  IPSET_ERROR);
 	*ret = num;
 
 	return err;
@@ -319,7 +325,7 @@ ipset_parse_port(struct ipset_session *session,
 	assert(opt == IPSET_OPT_PORT || opt == IPSET_OPT_PORT_TO);
 	assert(str);
 
-	if (string_to_u16(session, str, &port) == 0) {
+	if (string_to_u16(session, str, &port, IPSET_WARNING) == 0) {
 		return ipset_session_data_set(session, opt, &port);
 	}
 	/* Error is stored as warning in session report */
@@ -1335,7 +1341,8 @@ ipset_parse_timeout(struct ipset_session *session,
 	assert(opt == IPSET_OPT_TIMEOUT);
 	assert(str);
 
-	err = string_to_number_ll(session, str, 0, (UINT_MAX>>1)/1000, &llnum);
+	err = string_to_number_ll(session, str, 0, (UINT_MAX>>1)/1000, &llnum,
+				  IPSET_ERROR);
 	if (err == 0) {
 		/* Timeout is expected to be 32bits wide, so we have
 		   to convert it here */
@@ -1579,7 +1586,8 @@ ipset_parse_uint64(struct ipset_session *session,
 	assert(session);
 	assert(str);
 
-	err = string_to_number_ll(session, str, 0, ULLONG_MAX - 1, &value);
+	err = string_to_number_ll(session, str, 0, ULLONG_MAX - 1, &value,
+				  IPSET_ERROR);
 	if (err)
 		return err;
 
@@ -1623,7 +1631,7 @@ ipset_parse_uint16(struct ipset_session *session,
 	assert(session);
 	assert(str);
 
-	err = string_to_u16(session, str, &value);
+	err = string_to_u16(session, str, &value, IPSET_ERROR);
 	if (err == 0)
 		return ipset_session_data_set(session, opt, &value);
 
