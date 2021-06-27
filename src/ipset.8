@@ -333,7 +333,7 @@ are hex without 0x prefix.
 .IP
 ipset create foo hash:ip skbinfo
 .IP
-ipset add foo skbmark 0x1111/0xff00ffff skbprio 1:10 skbqueue 10
+ipset add foo 192.168.0.1 skbmark 0x1111/0xff00ffff skbprio 1:10 skbqueue 10
 .PP
 .SS hashsize
 This parameter is valid for the \fBcreate\fR command of all \fBhash\fR type sets.
