@@ -285,6 +285,10 @@ hash_netportnet4_uadt(struct ip_set *set, struct nlattr *tb[],
 	} else {
 		ip_set_mask_from_to(ip2_from, ip2_to, e.cidr[1]);
 	}
+	if ((ip_to - ip + 1)/(1<<(32 - e.cidr[0]))*
+	    (ip2_to - ip2_from + 1)/(1<<(32 - e.cidr[1])) *
+	    (port_to - port + 1) > IPSET_MAX_RANGE)
+		return -ERANGE;
 
 	if (retried) {
 		ip = ntohl(h->next.ip[0]);

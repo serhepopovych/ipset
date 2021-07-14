@@ -189,6 +189,8 @@ hash_net4_uadt(struct ip_set *set, struct nlattr *tb[],
 		if (ip + UINT_MAX == ip_to)
 			return -IPSET_ERR_HASH_RANGE;
 	}
+	if ((ip_to - ip + 1)/(1<<(32 - e.cidr)) > IPSET_MAX_RANGE)
+		return -ERANGE;
 	if (retried)
 		ip = ntohl(h->next.ip);
 	do {

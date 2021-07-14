@@ -25,6 +25,8 @@ static const struct ipset_errcode_table core_errcode_table[] = {
 	  "The set with the given name does not exist" },
 	{ EMSGSIZE, 0,
 	  "Kernel error received: message could not be created" },
+	{ ERANGE, 0,
+	  "The specified range is too large, split it up into smaller ranges" },
 	{ IPSET_ERR_PROTOCOL,  0,
 	  "Kernel error received: ipset protocol error" },
 
