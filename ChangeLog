@@ -1,3 +1,12 @@
+7.12
+  - Allow specifying protocols by number (Haw Loeung)
+  - Fix example in ipset.8 manpage discovered by Pablo Neira Ayuso.
+  - tests: add tests ipset to nftables (Pablo Neira Ayuso)
+  - add ipset to nftables translation infrastructure (Pablo Neira Ayuso)
+  - lib: Detach restore routine from parser (Pablo Neira Ayuso)
+  - lib: split parser from command execution (Pablo Neira Ayuso)
+  - Fix patch "Parse port before trying by service name"
+
 7.11
   - Parse port before trying by service name (Haw Loeung)
   - Silence unused-but-set-variable warnings (reported by

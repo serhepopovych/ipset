@@ -1,3 +1,12 @@
+7.12
+  - Limit the maximal range of consecutive elements to add/delete
+  - Backport "netfilter: use nfnetlink_unicast()"
+  - Backport "netfilter: nfnetlink: consolidate callback type"
+  - Backport "netfilter: nfnetlink: add struct nfnl_info and
+    pass it to callbacks"
+  - Backport "netfilter: add helper function to set up the
+    nfnetlink header and use it"
+
 7.10
   - Fix patch "Handle false warning from -Wstringop-overflow"
   - Backward compatibility: handle renaming nla_strlcpy to nla_strscpy
