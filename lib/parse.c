@@ -119,12 +119,13 @@ string_to_number_ll(struct ipset_session *session,
 
 static int
 string_to_u8(struct ipset_session *session,
-	     const char *str, uint8_t *ret)
+	     const char *str, uint8_t *ret,
+	     enum ipset_err_type errtype)
 {
 	int err;
 	unsigned long long num = 0;
 
-	err = string_to_number_ll(session, str, 0, 255, &num, IPSET_ERROR);
+	err = string_to_number_ll(session, str, 0, 255, &num, errtype);
 	*ret = num;
 
 	return err;
@@ -134,7 +135,7 @@ static int
 string_to_cidr(struct ipset_session *session,
 	       const char *str, uint8_t min, uint8_t max, uint8_t *ret)
 {
-	int err = string_to_u8(session, str, ret);
+	int err = string_to_u8(session, str, ret, IPSET_ERROR);
 
 	if (!err && (*ret < min || *ret > max))
 		return syntax_err("'%s' is out of range %u-%u",
@@ -475,21 +476,23 @@ ipset_parse_proto(struct ipset_session *session,
 {
 	const struct protoent *protoent;
 	uint8_t proto = 0;
+	uint8_t protonum = 0;
 
 	assert(session);
 	assert(opt == IPSET_OPT_PROTO);
 	assert(str);
 
-	protoent = getprotobyname(strcasecmp(str, "icmpv6") == 0
-				  ? "ipv6-icmp" : str);
-	if (protoent == NULL) {
-		uint8_t protonum = 0;
-
-		if (string_to_u8(session, str, &protonum) ||
-		    (protoent = getprotobynumber(protonum)) == NULL)
-			return syntax_err("cannot parse '%s' "
-					  "as a protocol", str);
+	if (string_to_u8(session, str, &protonum, IPSET_WARNING) == 0)
+		protoent = getprotobynumber(protonum);
+	else {
+		/* No error, so reset false error messages */
+		ipset_session_report_reset(session);
+		protoent = getprotobyname(strcasecmp(str, "icmpv6") == 0
+					  ? "ipv6-icmp" : str);
 	}
+	if (protoent == NULL)
+		return syntax_err("cannot parse '%s' "
+				  "as a protocol", str);
 	proto = protoent->p_proto;
 	if (!proto)
 		return syntax_err("Unsupported protocol '%s'", str);
@@ -519,8 +522,8 @@ parse_icmp_typecode(struct ipset_session *session,
 				 str, family);
 	}
 	*a++ = '\0';
-	if ((err = string_to_u8(session, tmp, &type)) != 0 ||
-	    (err = string_to_u8(session, a, &code)) != 0)
+	if ((err = string_to_u8(session, tmp, &type, IPSET_ERROR)) != 0 ||
+	    (err = string_to_u8(session, a, &code, IPSET_ERROR)) != 0)
 		goto error;
 
 	typecode = (type << 8) | code;
@@ -1659,7 +1662,7 @@ ipset_parse_uint8(struct ipset_session *session,
 	assert(session);
 	assert(str);
 
-	if ((err = string_to_u8(session, str, &value)) == 0)
+	if ((err = string_to_u8(session, str, &value, IPSET_ERROR)) == 0)
 		return ipset_session_data_set(session, opt, &value);
 
 	return err;
