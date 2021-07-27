@@ -1,3 +1,6 @@
+7.13
+  - Limit the maximal range of consecutive elements to add/delete fix
+
 7.12
   - Limit the maximal range of consecutive elements to add/delete
   - Backport "netfilter: use nfnetlink_unicast()"
