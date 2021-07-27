@@ -493,13 +493,13 @@ ipset_parse_proto(struct ipset_session *session,
 	assert(str);
 
 	if (string_to_u8(session, str, &protonum, IPSET_WARNING) == 0)
-		protoent = getprotobynumber(protonum);
-	else {
-		/* No error, so reset false error messages */
-		ipset_session_report_reset(session);
-		protoent = getprotobyname(strcasecmp(str, "icmpv6") == 0
-					  ? "ipv6-icmp" : str);
-	}
+		return ipset_session_data_set(session, opt, &protonum);
+
+	/* No error, so reset false error messages */
+	ipset_session_report_reset(session);
+	protoent = getprotobyname(strcasecmp(str, "icmpv6") == 0
+				  ? "ipv6-icmp" : str);
+
 	if (protoent == NULL)
 		return syntax_err("cannot parse '%s' "
 				  "as a protocol", str);
