@@ -1,3 +1,6 @@
+7.14
+  - 64bit division isn't allowed on 32bit, replace it with shift
+
 7.13
   - Limit the maximal range of consecutive elements to add/delete fix
 
