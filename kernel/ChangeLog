@@ -1,3 +1,7 @@
+7.15
+  - netfilter: ipset: Fix maximal range check in hash_ipportnet4_uadt()
+    (Nathan Chancellor)
+
 7.14
   - 64bit division isn't allowed on 32bit, replace it with shift
 
