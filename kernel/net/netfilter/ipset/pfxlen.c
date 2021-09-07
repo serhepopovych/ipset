@@ -1,4 +1,5 @@
 #include <linux/version.h>
+#include <linux/module.h>
 #include <linux/netfilter/ipset/pfxlen.h>
 
 /* Prefixlen maps for fast conversions, by Jan Engelhardt. */

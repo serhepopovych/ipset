@@ -5,6 +5,7 @@
 /* Get Layer-4 data from the packets */
 
 #include <linux/version.h>
+#include <linux/module.h>
 #include <linux/ip.h>
 #include <linux/skbuff.h>
 #include <linux/icmp.h>
