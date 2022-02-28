@@ -949,18 +949,6 @@ ipset_xlate_set_get(struct ipset *ipset, const char *name)
 	return NULL;
 }
 
-static const struct ipset_type *ipset_xlate_type_get(struct ipset *ipset,
-						     const char *name)
-{
-	const struct ipset_xlate_set *set;
-
-	set = ipset_xlate_set_get(ipset, name);
-	if (!set)
-		return NULL;
-
-	return set->type;
-}
-
 static int
 ipset_parser(struct ipset *ipset, int oargc, char *oargv[])
 {
@@ -1282,8 +1270,16 @@ ipset_parser(struct ipset *ipset, int oargc, char *oargv[])
 		if (!ipset->xlate) {
 			type = ipset_type_get(session, cmd);
 		} else {
-			type = ipset_xlate_type_get(ipset, arg0);
-			ipset_session_data_set(session, IPSET_OPT_TYPE, type);
+			const struct ipset_xlate_set *xlate_set;
+
+			xlate_set = ipset_xlate_set_get(ipset, arg0);
+			if (xlate_set) {
+				ipset_session_data_set(session, IPSET_OPT_TYPE,
+						       xlate_set->type);
+				ipset_session_data_set(session, IPSET_OPT_FAMILY,
+						       &xlate_set->family);
+				type = xlate_set->type;
+			}
 		}
 		if (type == NULL)
 			return ipset->standard_error(ipset, p);

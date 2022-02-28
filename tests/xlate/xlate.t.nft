@@ -54,3 +54,5 @@ add set inet global bp1 { type inet_service; }
 add element inet global bp1 { 22 }
 add set inet global bim1 { type ipv4_addr . ether_addr; }
 add element inet global bim1 { 1.1.1.1 . aa:bb:cc:dd:ee:ff }
+add set inet global hn6 { type ipv6_addr; flags interval; }
+add element inet global hn6 { fe80::/64 }

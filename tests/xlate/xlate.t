@@ -53,3 +53,5 @@ create bp1 bitmap:port range 1-1024
 add bp1 22
 create bim1 bitmap:ip,mac range 1.1.1.0/24
 add bim1 1.1.1.1,aa:bb:cc:dd:ee:ff
+create hn6 hash:net family inet6
+add hn6 fe80::/64
