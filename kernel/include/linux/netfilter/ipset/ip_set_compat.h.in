@@ -605,5 +605,11 @@ static inline void *kvzalloc(size_t size, gfp_t flags)
 	return members;
 }
 #endif
+
+#ifndef unsafe_memcpy
+#define unsafe_memcpy(dst, src, bytes, justification)		\
+	memcpy(dst, src, bytes)
+#endif
+
 #endif /* IP_SET_COMPAT_HEADERS */
 #endif /* __IP_SET_COMPAT_H */
