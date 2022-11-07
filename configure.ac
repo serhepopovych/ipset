@@ -443,6 +443,10 @@ if test -f $ksourcedir/include/linux/mm.h && \
    $GREP -q 'kvcalloc' $ksourcedir/include/linux/mm.h; then
 	AC_MSG_RESULT(yes)
 	AC_SUBST(HAVE_KVCALLOC, define)
+elif test -f $ksourcedir/include/linux/slab.h && \
+     $GREP -q 'kvcalloc' $ksourcedir/include/linux/slab.h; then
+	AC_MSG_RESULT(yes)
+	AC_SUBST(HAVE_KVCALLOC, define)
 else
 	AC_MSG_RESULT(no)
 	AC_SUBST(HAVE_KVCALLOC, undef)
@@ -451,6 +455,10 @@ fi
 AC_MSG_CHECKING([kernel source for kvfree])
 if test -f $ksourcedir/include/linux/mm.h && \
    $GREP -q 'kvfree' $ksourcedir/include/linux/mm.h; then
+	AC_MSG_RESULT(yes)
+	AC_SUBST(HAVE_KVFREE, define)
+elif test -f $ksourcedir/include/linux/slab.h && \
+     $GREP -q 'kvfree' $ksourcedir/include/linux/slab.h; then
 	AC_MSG_RESULT(yes)
 	AC_SUBST(HAVE_KVFREE, define)
 else
@@ -837,9 +845,13 @@ else
 	AC_SUBST(HAVE_NLMSG_UNICAST, undef)
 fi
 
-AC_MSG_CHECKING([kernel source for kvzalloc() in mm.h])
+AC_MSG_CHECKING([kernel source for kvzalloc() in mm.h and slab.h])
 if test -f $ksourcedir/include/linux/mm.h && \
    $GREP -q 'static inline void \*kvzalloc(' $ksourcedir/include/linux/mm.h; then
+	AC_MSG_RESULT(yes)
+	AC_SUBST(HAVE_KVZALLOC, define)
+elif test -f $ksourcedir/include/linux/slab.h && \
+   $GREP -q 'kvzalloc' $ksourcedir/include/linux/slab.h; then
 	AC_MSG_RESULT(yes)
 	AC_SUBST(HAVE_KVZALLOC, define)
 else
