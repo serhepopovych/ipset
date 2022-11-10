@@ -524,7 +524,7 @@ The \fBhash:ip\fR set type uses a hash to store IP host addresses (default) or
 network addresses. Zero valued IP address cannot be stored in a \fBhash:ip\fR
 type of set.
 .PP
-\fICREATE\-OPTIONS\fR := [ \fBfamily\fR { \fBinet\fR | \fBinet6\fR } ] [ \fBhashsize\fR \fIvalue\fR ] [ \fBmaxelem\fR \fIvalue\fR ] [ \fBbucketsize\fR \fIvalue\fR ] [ \fBnetmask\fP \fIcidr\fP ] [ \fBtimeout\fR \fIvalue\fR ] [ \fBcounters\fP ] [ \fBcomment\fP ] [ \fBskbinfo\fP ]
+\fICREATE\-OPTIONS\fR := [ \fBfamily\fR { \fBinet\fR | \fBinet6\fR } ] [ \fBhashsize\fR \fIvalue\fR ] [ \fBmaxelem\fR \fIvalue\fR ] [ \fBbucketsize\fR \fIvalue\fR ] [ \fBnetmask\fP \fIcidr\fP ] [ \fBbitmask\fP \fImask\fP ] [ \fBtimeout\fR \fIvalue\fR ] [ \fBcounters\fP ] [ \fBcomment\fP ] [ \fBskbinfo\fP ]
 .PP
 \fIADD\-ENTRY\fR := \fIipaddr\fR
 .PP
@@ -549,6 +549,9 @@ ipset create foo hash:ip netmask 30
 ipset add foo 192.168.1.0/24
 .IP 
 ipset test foo 192.168.1.2
+.TP
+\fBbitmask\fP \fImask\fP
+This works similar to \fBnetmask\fP but it will accept any valid IPv4/v6 address. It does not have to be a valid netmask.
 .SS hash:mac
 The \fBhash:mac\fR set type uses a hash to store MAC addresses. Zero valued MAC addresses cannot be stored in a \fBhash:mac\fR
 type of set. For matches on destination MAC addresses, see COMMENTS below.
@@ -648,7 +651,7 @@ over the second, so a nomatch entry could be potentially be ineffective if a mor
 first parameter existed with a suitable second parameter.
 Network address with zero prefix size cannot be stored in this type of set.
 .PP
-\fICREATE\-OPTIONS\fR := [ \fBfamily\fR { \fBinet\fR | \fBinet6\fR } ] [ \fBhashsize\fR \fIvalue\fR ] [ \fBmaxelem\fR \fIvalue\fR ] [ \fBbucketsize\fR \fIvalue\fR ] [ \fBtimeout\fR \fIvalue\fR ] [ \fBcounters\fP ] [ \fBcomment\fP ] [ \fBskbinfo\fP ]
+\fICREATE\-OPTIONS\fR := [ \fBfamily\fR { \fBinet\fR | \fBinet6\fR } ] [ \fBhashsize\fR \fIvalue\fR ] [ \fBmaxelem\fR \fIvalue\fR ] [ \fBbucketsize\fR \fIvalue\fR ] [ \fBnetmask\fP \fIcidr\fP ] [ \fBbitmask\fP \fImask\fP ] [ \fBtimeout\fR \fIvalue\fR ] [ \fBcounters\fP ] [ \fBcomment\fP ] [ \fBskbinfo\fP ]
 .PP
 \fIADD\-ENTRY\fR := \fInetaddr\fR,\fInetaddr\fR
 .PP
@@ -680,6 +683,18 @@ values added to the first parameter of the set. The number of secondary prefixes
 further increases this as the list of secondary prefixes is traversed per primary
 prefix.
 .PP
+Optional \fBcreate\fR options:
+.TP
+\fBnetmask\fP \fIcidr\fP
+When the optional \fBnetmask\fP parameter specified, network addresses will be
+stored in the set instead of IP host addresses. The \fIcidr\fP prefix value must be
+between 1\-32 for IPv4 and between 1\-128 for IPv6. An IP address will be in the set
+if the network address, which is resulted by masking the address with the netmask,
+can be found in the set.
+.TP
+\fBbitmask\fP \fImask\fP
+This works similar to \fBnetmask\fP but it will accept any valid IPv4/v6 address. It does not have to be a valid netmask.
+.PP
 Example:
 .IP
 ipset create foo hash:net,net
@@ -701,7 +716,7 @@ The \fBhash:ip,port\fR set type uses a hash to store IP address and port number 
 The port number is interpreted together with a protocol (default TCP) and zero
 protocol number cannot be used.
 .PP
-\fICREATE\-OPTIONS\fR := [ \fBfamily\fR { \fBinet\fR | \fBinet6\fR } ] [ \fBhashsize\fR \fIvalue\fR ] [ \fBmaxelem\fR \fIvalue\fR ] [ \fBbucketsize\fR \fIvalue\fR ] [ \fBtimeout\fR \fIvalue\fR ] [ \fBcounters\fP ] [ \fBcomment\fP ] [ \fBskbinfo\fP ]
+\fICREATE\-OPTIONS\fR := [ \fBfamily\fR { \fBinet\fR | \fBinet6\fR } ] [ \fBhashsize\fR \fIvalue\fR ] [ \fBmaxelem\fR \fIvalue\fR ] [ \fBbucketsize\fR \fIvalue\fR ] [ \fBnetmask\fP \fIcidr\fP ] [ \fBbitmask\fP \fImask\fP ] [ \fBtimeout\fR \fIvalue\fR ] [ \fBcounters\fP ] [ \fBcomment\fP ] [ \fBskbinfo\fP ]
 .PP
 \fIADD\-ENTRY\fR := \fIipaddr\fR,[\fIproto\fR:]\fIport\fR
 .PP
@@ -740,6 +755,18 @@ port number must be zero.
 The \fBhash:ip,port\fR type of sets require
 two \fBsrc\fR/\fBdst\fR parameters of the \fBset\fR match and \fBSET\fR
 target kernel modules.
+.PP
+Optional \fBcreate\fR options:
+.TP
+\fBnetmask\fP \fIcidr\fP
+When the optional \fBnetmask\fP parameter specified, network addresses will be
+stored in the set instead of IP host addresses. The \fIcidr\fP prefix value must be
+between 1\-32 for IPv4 and between 1\-128 for IPv6. An IP address will be in the set
+if the network address, which is resulted by masking the address with the netmask,
+can be found in the set.
+.TP
+\fBbitmask\fP \fImask\fP
+This works similar to \fBnetmask\fP but it will accept any valid IPv4/v6 address. It does not have to be a valid netmask.
 .PP
 Examples:
 .IP 
