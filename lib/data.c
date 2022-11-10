@@ -53,6 +53,7 @@ struct ipset_data {
 			uint8_t bucketsize;
 			uint8_t resize;
 			uint8_t netmask;
+			union nf_inet_addr bitmask;
 			uint32_t hashsize;
 			uint32_t maxelem;
 			uint32_t markmask;
@@ -301,6 +302,12 @@ ipset_data_set(struct ipset_data *data, enum ipset_opt opt, const void *value)
 	case IPSET_OPT_NETMASK:
 		data->create.netmask = *(const uint8_t *) value;
 		break;
+	case IPSET_OPT_BITMASK:
+		if (!(data->family == NFPROTO_IPV4 ||
+		      data->family == NFPROTO_IPV6))
+			return -1;
+		copy_addr(data->family, &data->create.bitmask, value);
+		break;
 	case IPSET_OPT_BUCKETSIZE:
 		data->create.bucketsize = *(const uint8_t *) value;
 		break;
@@ -508,6 +515,8 @@ ipset_data_get(const struct ipset_data *data, enum ipset_opt opt)
 		return &data->create.markmask;
 	case IPSET_OPT_NETMASK:
 		return &data->create.netmask;
+	case IPSET_OPT_BITMASK:
+		return &data->create.bitmask;
 	case IPSET_OPT_BUCKETSIZE:
 		return &data->create.bucketsize;
 	case IPSET_OPT_RESIZE:
@@ -594,6 +603,7 @@ ipset_data_sizeof(enum ipset_opt opt, uint8_t family)
 	case IPSET_OPT_IP_TO:
 	case IPSET_OPT_IP2:
 	case IPSET_OPT_IP2_TO:
+	case IPSET_OPT_BITMASK:
 		return family == NFPROTO_IPV4 ? sizeof(uint32_t)
 					 : sizeof(struct in6_addr);
 	case IPSET_OPT_MARK:

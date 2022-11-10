@@ -40,6 +40,7 @@ static const struct ipset_attrname createattr2name[] = {
 	[IPSET_ATTR_MAXELEM]	= { .name = "MAXELEM" },
 	[IPSET_ATTR_MARKMASK]	= { .name = "MARKMASK" },
 	[IPSET_ATTR_NETMASK]	= { .name = "NETMASK" },
+	[IPSET_ATTR_BITMASK]    = { .name = "BITMASK" },
 	[IPSET_ATTR_BUCKETSIZE]	= { .name = "BUCKETSIZE" },
 	[IPSET_ATTR_RESIZE]	= { .name = "RESIZE" },
 	[IPSET_ATTR_SIZE]	= { .name = "SIZE" },

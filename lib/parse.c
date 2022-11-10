@@ -1703,6 +1703,9 @@ ipset_parse_netmask(struct ipset_session *session,
 	assert(str);
 
 	data = ipset_session_data(session);
+	if (ipset_data_test(data, IPSET_OPT_BITMASK))
+		return syntax_err("bitmask and netmask are mutually exclusive, provide only one");
+
 	family = ipset_data_family(data);
 	if (family == NFPROTO_UNSPEC) {
 		family = NFPROTO_IPV4;
@@ -1719,6 +1722,46 @@ ipset_parse_netmask(struct ipset_session *session,
 				  family == NFPROTO_IPV4 ? 32 : 128);
 
 	return ipset_data_set(data, opt, &cidr);
+}
+
+/**
+ * ipset_parse_bitmask - parse string as a bitmask
+ * @session: session structure
+ * @opt: option kind of the data
+ * @str: string to parse
+ *
+ * Parse string as a bitmask value, depending on family type.
+ * If family is not set yet, INET is assumed.
+ * The value is stored in the data blob of the session.
+ *
+ * Returns 0 on success or a negative error code.
+ */
+int
+ipset_parse_bitmask(struct ipset_session *session,
+		    enum ipset_opt opt, const char *str)
+{
+	uint8_t family;
+	struct ipset_data *data;
+
+	assert(session);
+	assert(opt == IPSET_OPT_BITMASK);
+	assert(str);
+
+	data = ipset_session_data(session);
+	if (ipset_data_test(data, IPSET_OPT_NETMASK))
+		return syntax_err("bitmask and netmask are mutually exclusive, provide only one");
+
+	family = ipset_data_family(data);
+	if (family == NFPROTO_UNSPEC) {
+		family = NFPROTO_IPV4;
+		ipset_data_set(data, IPSET_OPT_FAMILY, &family);
+	}
+
+	if (parse_ipaddr(session, opt, str, family))
+		return syntax_err("bitmask is not valid for family = %s",
+				  family == NFPROTO_IPV4 ? "inet" : "inet6");
+
+	return 0;
 }
 
 /**

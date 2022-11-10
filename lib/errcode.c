@@ -44,6 +44,8 @@ static const struct ipset_errcode_table core_errcode_table[] = {
 	  "The value of the markmask parameter is invalid" },
 	{ IPSET_ERR_INVALID_FAMILY, 0,
 	  "Protocol family not supported by the set type" },
+	{ IPSET_ERR_BITMASK_NETMASK_EXCL, 0,
+	  "netmask and bitmask options are mutually exclusive, provide only one" },
 
 	/* DESTROY specific error codes */
 	{ IPSET_ERR_BUSY, IPSET_CMD_DESTROY,

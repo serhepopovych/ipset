@@ -462,6 +462,10 @@ static const struct ipset_attr_policy create_attrs[] = {
 		.type = MNL_TYPE_U32,
 		.opt = IPSET_OPT_MEMSIZE,
 	},
+	[IPSET_ATTR_BITMASK] = {
+		.type = MNL_TYPE_NESTED,
+		.opt = IPSET_OPT_BITMASK,
+	},
 };
 
 static const struct ipset_attr_policy adt_attrs[] = {
@@ -1721,6 +1725,10 @@ rawdata2attr(struct ipset_session *session, struct nlmsghdr *nlh,
 	if (attr->type == MNL_TYPE_NESTED) {
 		/* IP addresses */
 		struct nlattr *nested;
+
+		if (type == IPSET_ATTR_BITMASK)
+			family = ipset_data_family(session->data);
+
 		int atype = family == NFPROTO_IPV4 ? IPSET_ATTR_IPADDR_IPV4
 					      : IPSET_ATTR_IPADDR_IPV6;
 

@@ -92,6 +92,8 @@ extern int ipset_parse_uint8(struct ipset_session *session,
 			     enum ipset_opt opt, const char *str);
 extern int ipset_parse_netmask(struct ipset_session *session,
 			       enum ipset_opt opt, const char *str);
+extern int ipset_parse_bitmask(struct ipset_session *session,
+			       enum ipset_opt opt, const char *str);
 extern int ipset_parse_flag(struct ipset_session *session,
 			    enum ipset_opt opt, const char *str);
 extern int ipset_parse_typename(struct ipset_session *session,
