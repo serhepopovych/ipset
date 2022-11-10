@@ -72,7 +72,7 @@
 0 n=`ipset list test|grep '^10.0'|wc -l` && test $n -eq 1024
 # IP: Destroy sets
 0 ipset -X
-# Network: Create a set with timeout
+# Network: Create a set with timeout and netmask
 0 ipset -N test iphash --hashsize 128 --netmask 24 timeout 4
 # Network: Add zero valued element
 1 ipset -A test 0.0.0.0
@@ -210,4 +210,78 @@ skip which sendip
 0 ./check_extensions test 10.255.255.64 600 6 $((6*40))
 # Counters and timeout: destroy set
 0 ipset x test
+# Network: Create a set with timeout and bitmask
+0 ipset -N test iphash --hashsize 128 --bitmask 255.255.255.0 timeout 4
+# Network: Add zero valued element
+1 ipset -A test 0.0.0.0
+# Network: Test zero valued element
+1 ipset -T test 0.0.0.0
+# Network: Delete zero valued element
+1 ipset -D test 0.0.0.0
+# Network: Add first random network
+0 ipset -A test 2.0.0.1
+# Network: Add second random network
+0 ipset -A test 192.168.68.69
+# Network: Test first random value
+0 ipset -T test 2.0.0.255
+# Network: Test second random value
+0 ipset -T test 192.168.68.95
+# Network: Test value not added to the set
+1 ipset -T test 2.0.1.0
+# Network: Add third element
+0 ipset -A test 200.100.10.1 timeout 0
+# Network: Add third random network
+0 ipset -A test 200.100.0.12
+# Network: Delete the same network
+0 ipset -D test 200.100.0.12
+# Network: List set
+0 ipset -L test > .foo0 && ./sort.sh .foo0
+# Network: Check listing
+0 ./diff.sh .foo hash:ip.t.list4
+# Sleep 5s so that elements can time out
+0 sleep 5
+# Network: List set
+0 ipset -L test > .foo
+# Network: Check listing
+0 ./diff.sh .foo hash:ip.t.list5
+# Network: Flush test set
+0 ipset -F test
+# Network: add element with 1s timeout
+0 ipset add test 200.100.0.12 timeout 1
+# Network: readd element with 3s timeout
+0 ipset add test 200.100.0.12 timeout 3 -exist
+# Network: sleep 2s
+0 sleep 2s
+# Network: check readded element
+0 ipset test test 200.100.0.12
+# Network: Delete test set
+0 ipset -X test
+# Network: Create a set with both bitmask and netmask
+1 ipset -N test iphash --hashsize 128 --bitmask 255.255.0.255 --netmask 24
+# Network: Create a set with bitmask which is not a valid netmask
+0 ipset -N test iphash --hashsize 128 --bitmask 255.255.0.255
+# Network: Add zero valued element
+1 ipset -A test 0.0.0.0
+# Network: Test zero valued element
+1 ipset -T test 0.0.0.0
+# Network: Delete zero valued element
+1 ipset -D test 0.0.0.0
+# Network: Add first random network
+0 ipset -A test 1.2.3.4
+# Network: Add second random network
+0 ipset -A test 1.2.4.5
+# Network: Test first random value
+0 ipset -T test 1.2.9.4
+# Network: Test second random value
+0 ipset -T test 1.2.9.5
+# Network: Test value not added to the set
+1 ipset -T test 2.0.1.0
+# Network: Test delete value
+0 ipset -D test 1.2.0.5
+# Network: List set
+0 ipset -L test > .foo
+# Network: Check listing
+0 ./diff.sh .foo hash:ip.t.list6
+# Network: Delete test set
+0 ipset -X test
 # eof

@@ -170,4 +170,122 @@
 0 ./check_extensions test 2.0.0.20 700 13 12479
 # Counters and timeout: destroy set
 0 ipset x test
+# Network: Create a set with timeout and netmask
+0 ipset -N test hash:ip,port --hashsize 128 --netmask 24 timeout 4
+# Network: Add zero valued element
+1 ipset -A test 0.0.0.0,80
+# Network: Test zero valued element
+1 ipset -T test 0.0.0.0,80
+# Network: Delete zero valued element
+1 ipset -D test 0.0.0.0,80
+# Network: Add first random network
+0 ipset -A test 2.0.0.1,8080
+# Network: Add second random network
+0 ipset -A test 192.168.68.69,22
+# Network: Test first random value
+0 ipset -T test 2.0.0.255,8080
+# Network: Test second random value
+0 ipset -T test 192.168.68.95,22
+# Network: Test value not added to the set
+1 ipset -T test 2.0.1.0,8080
+# Network: Add third element
+0 ipset -A test 200.100.10.1,22 timeout 0
+# Network: Add third random network
+0 ipset -A test 200.100.0.12,22
+# Network: Delete the same network
+0 ipset -D test 200.100.0.12,22
+# Network: List set
+0 ipset -L test > .foo0 && ./sort.sh .foo0
+# Network: Check listing
+0 ./diff.sh .foo hash:ip,port.t.list3
+# Sleep 5s so that elements can time out
+0 sleep 5
+# Network: List set
+0 ipset -L test > .foo
+# Network: Check listing
+0 ./diff.sh .foo hash:ip,port.t.list4
+# Network: Flush test set
+0 ipset -F test
+# Network: add element with 1s timeout
+0 ipset add test 200.100.0.12,80 timeout 1
+# Network: readd element with 3s timeout
+0 ipset add test 200.100.0.12,80 timeout 3 -exist
+# Network: sleep 2s
+0 sleep 2s
+# Network: check readded element
+0 ipset test test 200.100.0.12,80
+# Network: Delete test set
+0 ipset -X test
+# Network: Create a set with timeout and bitmask
+0 ipset -N test hash:ip,port --hashsize 128 --bitmask 255.255.255.0 timeout 4
+# Network: Add zero valued element
+1 ipset -A test 0.0.0.0,80
+# Network: Test zero valued element
+1 ipset -T test 0.0.0.0,80
+# Network: Delete zero valued element
+1 ipset -D test 0.0.0.0,80
+# Network: Add first random network
+0 ipset -A test 2.0.0.1,8080
+# Network: Add second random network
+0 ipset -A test 192.168.68.69,22
+# Network: Test first random value
+0 ipset -T test 2.0.0.255,8080
+# Network: Test second random value
+0 ipset -T test 192.168.68.95,22
+# Network: Test value not added to the set
+1 ipset -T test 2.0.1.0,8080
+# Network: Add third element
+0 ipset -A test 200.100.10.1,22 timeout 0
+# Network: Add third random network
+0 ipset -A test 200.100.0.12,22
+# Network: Delete the same network
+0 ipset -D test 200.100.0.12,22
+# Network: List set
+0 ipset -L test > .foo0 && ./sort.sh .foo0
+# Network: Check listing
+0 ./diff.sh .foo hash:ip,port.t.list5
+# Sleep 5s so that elements can time out
+0 sleep 5
+# Network: List set
+0 ipset -L test > .foo
+# Network: Check listing
+0 ./diff.sh .foo hash:ip,port.t.list6
+# Network: Flush test set
+0 ipset -F test
+# Network: add element with 1s timeout
+0 ipset add test 200.100.0.12,80 timeout 1
+# Network: readd element with 3s timeout
+0 ipset add test 200.100.0.12,80 timeout 3 -exist
+# Network: sleep 2s
+0 sleep 2s
+# Network: check readded element
+0 ipset test test 200.100.0.12,80
+# Network: Delete test set
+0 ipset -X test
+# Network: Create a set with bitmask which is not a valid netmask
+0 ipset -N test hash:ip,port --hashsize 128 --bitmask 255.255.0.255
+# Network: Add zero valued element
+1 ipset -A test 0.0.0.0
+# Network: Test zero valued element
+1 ipset -T test 0.0.0.0
+# Network: Delete zero valued element
+1 ipset -D test 0.0.0.0
+# Network: Add first random network
+0 ipset -A test 1.2.3.4,22
+# Network: Add second random network
+0 ipset -A test 1.168.122.124,22
+# Network: Test first random value
+0 ipset -T test 1.2.9.4,22
+# Network: Test second random value
+0 ipset -T test 1.168.68.124,22
+# Network: Test value not added to the set
+1 ipset -T test 2.0.1.0,23
+# Network: Test delete value
+0 ipset -D test 1.168.0.124,22
+# Network: List set
+0 ipset -L test > .foo
+# Network: Check listing
+0 ./diff.sh .foo hash:ip,port.t.list7
+# Network: Delete test set
+0 ipset -X test
 # eof
