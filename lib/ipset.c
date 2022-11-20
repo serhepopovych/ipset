@@ -30,6 +30,7 @@
 #include <libipset/ipset.h>			/* prototypes */
 #include <libipset/ip_set_compiler.h>		/* compiler attributes */
 #include <libipset/list_sort.h>			/* lists */
+#include <libipset/xlate.h>			/* ipset_xlate_argv */
 
 static char program_name[] = PACKAGE;
 static char program_version[] = PACKAGE_VERSION;
@@ -936,10 +937,10 @@ static const char *cmd_prefix[] = {
 	[IPSET_TEST]   = "test   SETNAME",
 };
 
-static const struct ipset_xlate_set *
+static struct ipset_xlate_set *
 ipset_xlate_set_get(struct ipset *ipset, const char *name)
 {
-	const struct ipset_xlate_set *set;
+	struct ipset_xlate_set *set;
 
 	list_for_each_entry(set, &ipset->xlate_sets, list) {
 		if (!strcmp(set->name, name))
@@ -958,7 +959,7 @@ ipset_parser(struct ipset *ipset, int oargc, char *oargv[])
 	char *arg0 = NULL, *arg1 = NULL;
 	const struct ipset_envopts *opt;
 	const struct ipset_commands *command;
-	const struct ipset_type *type;
+	const struct ipset_type *type = NULL;
 	struct ipset_session *session = ipset->session;
 	void *p = ipset_session_printf_private(session);
 	int argc = oargc;
@@ -1127,6 +1128,7 @@ ipset_parser(struct ipset *ipset, int oargc, char *oargv[])
 			if (arg0) {
 				const struct ipset_arg *arg;
 				int k;
+				enum ipset_adt c;
 
 				/* Type-specific help, without kernel checking */
 				type = type_find(arg0);
@@ -1136,11 +1138,11 @@ ipset_parser(struct ipset *ipset, int oargc, char *oargv[])
 						"Unknown settype: `%s'", arg0);
 				printf("\n%s type specific options:\n\n", type->name);
 				for (i = 0; cmd_help_order[i] != IPSET_CADT_MAX; i++) {
-					cmd = cmd_help_order[i];
+					c = cmd_help_order[i];
 					printf("%s %s %s\n",
-						cmd_prefix[cmd], type->name, type->cmd[cmd].help);
-					for (k = 0; type->cmd[cmd].args[k] != IPSET_ARG_NONE; k++) {
-						arg = ipset_keyword(type->cmd[cmd].args[k]);
+						cmd_prefix[c], type->name, type->cmd[c].help);
+					for (k = 0; type->cmd[c].args[k] != IPSET_ARG_NONE; k++) {
+						arg = ipset_keyword(type->cmd[c].args[k]);
 						if (!arg->help || arg->help[0] == '\0')
 							continue;
 						printf("               %s\n", arg->help);
@@ -1548,7 +1550,7 @@ ipset_fini(struct ipset *ipset)
 }
 
 /* Ignore the set family, use inet. */
-static const char *ipset_xlate_family(uint8_t family)
+static const char *ipset_xlate_family(uint8_t family UNUSED)
 {
 	return "inet";
 }
@@ -1705,6 +1707,10 @@ ipset_xlate_type_to_nftables(int family, enum ipset_xlate_set_type type,
 		else if (family == AF_INET6)
 			return "ipv6_addr";
 		break;
+	case IPSET_XLATE_TYPE_UNKNOWN:
+		break;
+	default:
+		break;
 	}
 	/* This should not ever happen. */
 	return "unknown";
@@ -1729,7 +1735,6 @@ static int ipset_xlate(struct ipset *ipset, enum ipset_cmd cmd,
 	char buf[64];
 	bool concat;
 	char *term;
-	int i;
 
 	session = ipset_session(ipset);
 	data = ipset_session_data(session);
@@ -1843,7 +1848,7 @@ static int ipset_xlate(struct ipset *ipset, enum ipset_cmd cmd,
 		return -1;
 	case IPSET_CMD_LIST:
 		if (!set) {
-			printf("list sets %s\n",
+			printf("list sets %s %s\n",
 			       ipset_xlate_family(family), table);
 		} else {
 			printf("list set %s %s %s\n",
@@ -1902,6 +1907,8 @@ static int ipset_xlate(struct ipset *ipset, enum ipset_cmd cmd,
 		}
 		if (ipset_data_test(data, IPSET_OPT_ETHER)) {
 			ipset_print_ether(buf, sizeof(buf), data, IPSET_OPT_ETHER, 0);
+			size_t i;
+
 			for (i = 0; i < strlen(buf); i++)
 				buf[i] = tolower(buf[i]);
 
@@ -1964,7 +1971,6 @@ static int ipset_xlate_restore(struct ipset *ipset)
 	struct ipset_session *session = ipset_session(ipset);
 	struct ipset_data *data = ipset_session_data(session);
 	void *p = ipset_session_printf_private(session);
-	const char *filename;
 	enum ipset_cmd cmd;
 	FILE *f = stdin;
 	int ret = 0;
@@ -1973,7 +1979,7 @@ static int ipset_xlate_restore(struct ipset *ipset)
 	if (ipset->filename) {
 		f = fopen(ipset->filename, "r");
 		if (!f) {
-			fprintf(stderr, "cannot open file `%s'\n", filename);
+			fprintf(stderr, "cannot open file `%s'\n", ipset->filename);
 			return -1;
 		}
 	}
@@ -2007,7 +2013,7 @@ static int ipset_xlate_restore(struct ipset *ipset)
 		ipset_data_reset(data);
 	}
 
-	if (filename)
+	if (ipset->filename)
 		fclose(f);
 
 	return ret;

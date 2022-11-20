@@ -61,7 +61,7 @@ static inline void list_del(struct list_head *entry)
 	// entry->prev = (void *) 0;
 }
 
-static inline void __list_splice(const struct list_head *list,
+static inline void __list_splice(struct list_head *list,
 				 struct list_head *prev,
 				 struct list_head *next)
 {
@@ -75,7 +75,7 @@ static inline void __list_splice(const struct list_head *list,
 	next->prev = last;
 }
 
-static inline void list_splice(const struct list_head *list,
+static inline void list_splice(struct list_head *list,
 			       struct list_head *head)
 {
 	if (!list_empty(list))

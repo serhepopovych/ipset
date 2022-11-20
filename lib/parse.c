@@ -280,7 +280,8 @@ static int
 parse_portname(struct ipset_session *session, const char *str,
 	       uint16_t *port, const char *proto)
 {
-	char *saved, *tmp, *protoname;
+	char *saved, *tmp;
+	const char *protoname;
 	const struct protoent *protoent;
 	struct servent *service;
 	uint8_t protonum = 0;
@@ -292,7 +293,7 @@ parse_portname(struct ipset_session *session, const char *str,
 	if (tmp == NULL)
 		goto error;
 
-	protoname = (char *)proto;
+	protoname = proto;
 	if (string_to_u8(session, proto, &protonum, IPSET_WARNING) == 0) {
 		protoent = getprotobynumber(protonum);
 		if (protoent == NULL)
