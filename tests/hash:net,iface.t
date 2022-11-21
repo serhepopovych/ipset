@@ -132,6 +132,10 @@
 0 (set -e; for x in `seq 0 63`; do ipset add test 10.0.0.0/16,eth$x; done)
 # Check listing
 0 n=`ipset list test | grep -v Revision: | wc -l` && test $n -eq 71
+# Flush test set
+0 ipset flush test
+# Try to add more than 64 clashing entries
+1 (set -e; for x in `seq 0 64`; do ipset add test 10.0.0.0/16,eth$x; done)
 # Delete test set
 0 ipset destroy test
 # Check all possible CIDR values
