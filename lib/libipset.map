@@ -213,3 +213,7 @@ global:
   ipset_xlate_argv;
 } LIBIPSET_4.10;
 
+LIBIPSET_4.12 {
+global:
+  ipset_parse_bitmask;
+} LIBIPSET_4.10;
