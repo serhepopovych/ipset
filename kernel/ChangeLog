@@ -1,3 +1,24 @@
+7.16
+  - netfilter: ipset: restore allowing 64 clashing elements in hash:net,iface
+  - Fix all debug mode warnings
+  - netfilter: ipset: Add support for new bitmask parameter (Vishwanath Pai)
+  - netfilter: ipset: regression in ip_set_hash_ip.c (Vishwanath Pai)
+  - netfilter: move from strlcpy with unused retval to strscpy
+    (Wolfram Sang)
+  - compatibility: handle unsafe_memcpy()
+  - netlink: Bounds-check struct nlmsgerr creation (Kees Cook)
+  - compatibility: move to skb_protocol in the code from tc_skb_protocol
+  - Compatibility: check kvcalloc, kvfree, kvzalloc in slab.h too
+  - sched: consistently handle layer3 header accesses in the presence
+    of VLANs (Toke Høiland-Jørgensen)
+  - treewide: Replace GPLv2 boilerplate/reference with SPDX
+    - rule 500 (Thomas Gleixner)
+  - headers: Remove some left-over license text in 
+    include/uapi/linux/netfilter/ (Christophe JAILLET)
+  - netfilter: ipset: enforce documented limit to prevent allocating
+    huge memory
+  - netfilter: ipset: Fix oversized kvmalloc() calls
+
 7.15
   - netfilter: ipset: Fix maximal range check in hash_ipportnet4_uadt()
     (Nathan Chancellor)

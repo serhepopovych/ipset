@@ -1,3 +1,18 @@
+7.16
+  - Add new ipset_parse_bitmask() function to the library interface
+  - test: Make sure no more than 64 clashing elements can be added
+    to hash:net,iface sets
+  - netfilter: ipset: add tests for the new bitmask feature (Vishwanath Pai)
+  - netfilter: ipset: Update the man page to include netmask/bitmask options
+    (Vishwanath Pai)
+  - netfilter: ipset: Add bitmask support to hash:netnet (Vishwanath Pai)
+  - netfilter: ipset: Add bitmask support to hash:ipport (Vishwanath Pai)
+  - netfilter: ipset: Add bitmask support to hash:ip (Vishwanath Pai)
+  - netfilter: ipset: Add support for new bitmask parameter (Vishwanath Pai)
+  - ipset-translate: allow invoking with a path name (Quentin Armitage)
+  - Fix IPv6 sets nftables translation (Pablo Neira Ayuso)
+  - Fix typo in ipset-translate man page (Bernhard M. Wiedemann)
+
 7.14
   - Add missing function to libipset.map and bump library version
     (reported by Jan Engelhardt)
