@@ -136,6 +136,12 @@
 0 ipset del test 10.0.0.1-10.0.0.10
 # Range: Check number of elements
 0 n=`ipset save test|wc -l` && test $n -eq 1
+# Range: Flush set
+0 ipset flush test
+# Range: Add elements in multiple internal batches
+0 ipset add test 10.1.0.0-10.1.64.255
+# Range: Check number of elements
+0 n=`ipset save test|grep '^add test 10.1' | wc -l` && test $n -eq 16640
 # Range: Delete test set
 0 ipset destroy test
 # Timeout: Check that resizing keeps timeout values
