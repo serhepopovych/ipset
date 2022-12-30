@@ -1,3 +1,7 @@
+7.17
+  - netfilter: ipset: Rework long task execution when adding/deleting entries
+  - netfilter: ipset: fix hash:net,port,net hang with /0 subnet
+
 7.16
   - netfilter: ipset: restore allowing 64 clashing elements in hash:net,iface
   - Fix all debug mode warnings

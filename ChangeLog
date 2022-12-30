@@ -1,3 +1,9 @@
+7.17
+  - Tests: When verifying comments/timeouts, make sure entries don't expire
+  - Tests: Make sure the internal batches add the correct number of elements
+  - Tests: Verify that hash:net,port,net type can handle 0/0 properly
+  - Makefile: Create LZMA-compressed dist-files (Phil Sutter)
+
 7.16
   - Add new ipset_parse_bitmask() function to the library interface
   - test: Make sure no more than 64 clashing elements can be added
