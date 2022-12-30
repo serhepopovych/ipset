@@ -113,7 +113,7 @@
 # Hash comment: Stress test with comments and timeout
 0 ./netnetgen.sh comment timeout | ipset restore
 # Hash comment: List set and check the number of elements
-0 n=`ipset -L test|grep '^10.'|wc -l` && test $n -eq 87040
+0 n=`ipset save test|grep 'add test 10.'|wc -l` && test $n -eq 87040
 # Hash comment: Destroy test set
 0 ipset destroy test
 # Hash comment: create set with timeout
