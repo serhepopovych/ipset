@@ -27,7 +27,7 @@ AC_ARG_WITH([kmod],
                            [Build the kernel module (default: yes)]),
             [BUILDKMOD="$withval";],
             [BUILDKMOD="yes";])
-AM_CONDITIONAL(WITH_KMOD, test "$BUILDKMOD" == "yes")
+AM_CONDITIONAL(WITH_KMOD, test "$BUILDKMOD" = "yes")
 
 dnl Additional arguments
 dnl Kernel build directory or source tree
@@ -76,7 +76,7 @@ if test "x$enable_bashcompl" = "xyes"; then
 	AC_SUBST(bashcompdir)
 fi
 
-if test "$BUILDKMOD" == "yes"
+if test "$BUILDKMOD" = "yes"
 then
 dnl Sigh: check kernel version dependencies
 if test "$KBUILDDIR" != ""
@@ -204,7 +204,7 @@ AC_CHECK_TYPES([union nf_inet_addr],,,[#include <linux/types.h>
 dnl Checks for functions
 AC_CHECK_FUNCS(gethostbyname2)
 
-if test "$BUILDKMOD" == "yes"
+if test "$BUILDKMOD" = "yes"
 then
 dnl Check kernel incompatibilities... Ugly like hell
 
