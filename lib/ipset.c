@@ -1999,7 +1999,7 @@ static int ipset_xlate_restore(struct ipset *ipset)
 
 		ret = build_argv(ipset, c);
 		if (ret < 0)
-			return ret;
+			break;
 
 		cmd = ipset_parser(ipset, ipset->newargc, ipset->newargv);
 		if (cmd < 0)
