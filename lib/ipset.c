@@ -1876,9 +1876,6 @@ static int ipset_xlate(struct ipset *ipset, enum ipset_cmd cmd,
 				cmd == IPSET_CMD_DEL ? "delete" : "get",
 		       ipset_xlate_family(family), table, set);
 
-		typename = ipset_data_get(data, IPSET_OPT_TYPENAME);
-		type = ipset_xlate_set_type(typename);
-
 		xlate_set = (struct ipset_xlate_set *)
 				ipset_xlate_set_get(ipset, set);
 		if (xlate_set && xlate_set->interval)
