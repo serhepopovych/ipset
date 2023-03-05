@@ -6,14 +6,10 @@ if [ ! -x "$DIFF" ] ; then
 	exit 1
 fi
 
-IPSET_XLATE=$(which ipset-translate)
-if [ ! -x "$IPSET_XLATE" ] ; then
-	echo "ERROR: ipset-translate is not installed yet"
-	exit 1
-fi
+ipset_xlate=${IPSET_XLATE_BIN:-$(dirname $0)/ipset-translate}
 
 TMP=$(mktemp)
-ipset-translate restore < xlate.t &> $TMP
+$ipset_xlate restore < xlate.t &> $TMP
 if [ $? -ne 0 ]
 then
 	cat $TMP
