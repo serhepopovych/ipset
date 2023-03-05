@@ -37,6 +37,30 @@ NETS="0.0.0.0/1
 
 ipset="../src/ipset"
 
+if which netmask >/dev/null 2>&1; then
+	net_first_addr() {
+		netmask -r $1 | cut -d - -f 1
+	}
+	net_last_addr() {
+		netmask -r $1 | cut -d - -f 2 | cut -d ' ' -f 1
+	}
+elif which ipcalc >/dev/null 2>&1; then
+	net_first_addr() {
+		ipcalc $1 | awk '/^Address:/{print $2}'
+	}
+	net_last_addr() {
+		# Netmask tool prints broadcast address as last one, so
+		# prefer that instead of HostMax. Also fix for /31 and /32
+		# being recognized as special by ipcalc.
+		ipcalc $1 | awk '/^(Hostroute|HostMax):/{out=$2}
+				 /^Broadcast:/{out=$2}
+				 END{print out}'
+	}
+else
+	echo "need either netmask or ipcalc tools"
+	exit 1
+fi
+
 case "$1" in
 net)
     $ipset n test hash:net
@@ -46,9 +70,9 @@ net)
     done <<<"$NETS"
 
     while IFS= read x; do
-    	first=`netmask -r $x | cut -d - -f 1`
+    	first=`net_first_addr $x`
     	$ipset test test $first >/dev/null 2>&1
-    	last=`netmask -r $x | cut -d - -f 2 | cut -d ' ' -f 1`
+    	last=`net_last_addr $x`
     	$ipset test test $last >/dev/null 2>&1
     done <<<"$NETS"
 
@@ -67,9 +91,9 @@ net,port)
 
     n=1
     while IFS= read x; do
-    	first=`netmask -r $x | cut -d - -f 1`
+    	first=`net_first_addr $x`
     	$ipset test test $first,$n >/dev/null 2>&1
-    	last=`netmask -r $x | cut -d - -f 2 | cut -d ' ' -f 1`
+    	last=`net_last_addr $x`
     	$ipset test test $last,$n >/dev/null 2>&1
     	n=$((n+1))
     done <<<"$NETS"
