@@ -6,7 +6,17 @@ if [ ! -x "$DIFF" ] ; then
 	exit 1
 fi
 
+ipset=${IPSET_BIN:-../../src/ipset}
 ipset_xlate=${IPSET_XLATE_BIN:-$(dirname $0)/ipset-translate}
+
+$ipset restore < xlate.t
+rc=$?
+$ipset destroy
+if [ $rc -ne 0 ]
+then
+	echo -e "[\033[0;31mERROR\033[0m] invalid test input"
+	exit 1
+fi
 
 TMP=$(mktemp)
 $ipset_xlate restore < xlate.t &> $TMP
