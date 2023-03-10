@@ -62,10 +62,10 @@
 0 ipset test test 2.0.0.1,tcp:80
 # Test element with UDP protocol
 0 ipset test test 2.0.0.1,udp:80
-# Add element with vrrp
-0 ipset add test 2.0.0.1,vrrp:0
-# Test element with vrrp
-0 ipset test test 2.0.0.1,vrrp:0
+# Add element with GRE
+0 ipset add test 2.0.0.1,gre:0
+# Test element with GRE
+0 ipset test test 2.0.0.1,gre:0
 # Add element with sctp
 0 ipset add test 2.0.0.1,sctp:80
 # Test element with sctp
