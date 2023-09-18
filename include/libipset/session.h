@@ -98,6 +98,7 @@ enum ipset_output_mode {
 	IPSET_LIST_PLAIN,
 	IPSET_LIST_SAVE,
 	IPSET_LIST_XML,
+	IPSET_LIST_JSON,
 };
 
 extern int ipset_session_output(struct ipset_session *session,

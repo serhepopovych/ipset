@@ -235,7 +235,7 @@ const struct ipset_envopts ipset_envopts[] = {
 	{ .name = { "-o", "-output" },
 	  .has_arg = IPSET_MANDATORY_ARG,	.flag = IPSET_OPT_MAX,
 	  .parse = ipset_parse_output,
-	  .help = "plain|save|xml\n"
+	  .help = "plain|save|xml|json\n"
 		  "       Specify output mode for listing sets.\n"
 		  "       Default value for \"list\" command is mode \"plain\"\n"
 		  "       and for \"save\" command is mode \"save\".",
@@ -429,6 +429,8 @@ ipset_parse_output(struct ipset *ipset,
 		return ipset_session_output(session, IPSET_LIST_PLAIN);
 	else if (STREQ(str, "xml"))
 		return ipset_session_output(session, IPSET_LIST_XML);
+	else if (STREQ(str, "json"))
+		return ipset_session_output(session, IPSET_LIST_JSON);
 	else if (STREQ(str, "save"))
 		return ipset_session_output(session, IPSET_LIST_SAVE);
 

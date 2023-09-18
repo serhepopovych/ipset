@@ -21,7 +21,7 @@ ipset \(em administration tool for IP sets
 .PP
 COMMANDS := { \fBcreate\fR | \fBadd\fR | \fBdel\fR | \fBtest\fR | \fBdestroy\fR | \fBlist\fR | \fBsave\fR | \fBrestore\fR | \fBflush\fR | \fBrename\fR | \fBswap\fR | \fBhelp\fR | \fBversion\fR | \fB\-\fR }
 .PP
-\fIOPTIONS\fR := { \fB\-exist\fR | \fB\-output\fR { \fBplain\fR | \fBsave\fR | \fBxml\fR } | \fB\-quiet\fR | \fB\-resolve\fR | \fB\-sorted\fR | \fB\-name\fR | \fB\-terse\fR | \fB\-file\fR \fIfilename\fR }
+\fIOPTIONS\fR := { \fB\-exist\fR | \fB\-output\fR { \fBplain\fR | \fBsave\fR | \fBxml\fR } | \fBjson\fR } | \fB\-quiet\fR | \fB\-resolve\fR | \fB\-sorted\fR | \fB\-name\fR | \fB\-terse\fR | \fB\-file\fR \fIfilename\fR }
 .PP
 \fBipset\fR \fBcreate\fR \fISETNAME\fR \fITYPENAME\fR [ \fICREATE\-OPTIONS\fR ]
 .PP
@@ -118,7 +118,7 @@ option is given, the entries are listed/saved sorted (which may be slow).
 The option
 \fB\-output\fR
 can be used to control the format of the listing:
-\fBplain\fR, \fBsave\fR or \fBxml\fR.
+\fBplain\fR, \fBsave\fR, \fBxml\fR or \fBjson\fR.
 (The default is
 \fBplain\fR.)
 If the option
@@ -187,7 +187,7 @@ cannot be abbreviated.
 Ignore errors when exactly the same set is to be created or already
 added entry is added or missing entry is deleted.
 .TP 
-\fB\-o\fP, \fB\-output\fP { \fBplain\fR | \fBsave\fR | \fBxml\fR }
+\fB\-o\fP, \fB\-output\fP { \fBplain\fR | \fBsave\fR | \fBxml\fR | \fBjson\fR }
 Select the output format to the
 \fBlist\fR
 command.

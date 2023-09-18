@@ -1130,9 +1130,9 @@ if [[ $prev = @(-o|-output) ]]; then
     # make sure it's not a filename named -o or -output
     if [[ $str_filename != $prev ]]; then
         if ((names_only || headers_only)); then
-            COMPREPLY=( $( compgen -W 'plain xml' -- "$cur" ) )
+            COMPREPLY=( $( compgen -W 'plain xml json' -- "$cur" ) )
         else
-            COMPREPLY=( $( compgen -W 'plain save xml' -- "$cur" ) )
+            COMPREPLY=( $( compgen -W 'plain save xml json' -- "$cur" ) )
         fi
         return 0
     fi

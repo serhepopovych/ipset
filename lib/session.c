@@ -860,6 +860,7 @@ list_adt(struct ipset_session *session, struct nlattr *nla[])
 	const struct ipset_arg *arg;
 	size_t offset = 0;
 	int i, found = 0;
+	static char last_setname[IPSET_MAXNAMELEN] = "";
 
 	D("enter");
 	/* Check and load type, family */
@@ -894,6 +895,13 @@ list_adt(struct ipset_session *session, struct nlattr *nla[])
 	case IPSET_LIST_XML:
 		safe_snprintf(session, "<member><elem>");
 		break;
+	case IPSET_LIST_JSON:
+		/* print separator if a member for this set was printed before */
+		if (STREQ(ipset_data_setname(data), last_setname))
+			safe_snprintf(session, ",");
+		strcpy(last_setname, ipset_data_setname(data));
+		safe_snprintf(session, "\n      {\n        \"elem\" : \"");
+		break;
 	case IPSET_LIST_PLAIN:
 	default:
 		break;
@@ -902,6 +910,8 @@ list_adt(struct ipset_session *session, struct nlattr *nla[])
 	safe_dprintf(session, ipset_print_elem, IPSET_OPT_ELEM);
 	if (session->mode == IPSET_LIST_XML)
 		safe_snprintf(session, "</elem>");
+	if (session->mode == IPSET_LIST_JSON)
+		safe_snprintf(session, "\"");
 
 	for (i = 0; type->cmd[IPSET_ADD].args[i] != IPSET_ARG_NONE; i++) {
 		arg = ipset_keyword(type->cmd[IPSET_ADD].args[i]);
@@ -929,6 +939,15 @@ list_adt(struct ipset_session *session, struct nlattr *nla[])
 			safe_dprintf(session, arg->print, arg->opt);
 			safe_snprintf(session, "</%s>", arg->name[0]);
 			break;
+		case IPSET_LIST_JSON:
+			if (arg->has_arg == IPSET_NO_ARG) {
+				safe_snprintf(session,
+					      ",\n        \"%s\" : true", arg->name[0]);
+				break;
+			}
+			safe_snprintf(session, ",\n        \"%s\" : ", arg->name[0]);
+			safe_dprintf(session, arg->print, arg->opt);
+			break;
 		default:
 			break;
 		}
@@ -936,6 +955,8 @@ list_adt(struct ipset_session *session, struct nlattr *nla[])
 
 	if (session->mode == IPSET_LIST_XML)
 		safe_snprintf(session, "</member>\n");
+	else if (session->mode == IPSET_LIST_JSON)
+		safe_snprintf(session, "\n      }");
 	else
 		safe_snprintf(session, "\n");
 
@@ -972,6 +993,7 @@ list_create(struct ipset_session *session, struct nlattr *nla[])
 	const struct ipset_arg *arg;
 	uint8_t family;
 	int i;
+	static bool firstipset = true;
 
 	for (i = IPSET_ATTR_UNSPEC + 1; i <= IPSET_ATTR_CREATE_MAX; i++)
 		if (nla[i]) {
@@ -1004,6 +1026,19 @@ list_create(struct ipset_session *session, struct nlattr *nla[])
 			      "<type>%s</type>\n"
 			      "<revision>%u</revision>\n"
 			      "<header>",
+			      ipset_data_setname(data),
+			      type->name, type->revision);
+		break;
+	case IPSET_LIST_JSON:
+		if (!firstipset)
+			safe_snprintf(session, ",\n");
+		firstipset = false;
+		safe_snprintf(session,
+			      "  \{\n"
+			      "    \"name\" : \"%s\",\n"
+			      "    \"type\" : \"%s\",\n"
+			      "    \"revision\" : %u,\n"
+			      "    \"header\" : \{\n",
 			      ipset_data_setname(data),
 			      type->name, type->revision);
 		break;
@@ -1042,6 +1077,22 @@ list_create(struct ipset_session *session, struct nlattr *nla[])
 			safe_dprintf(session, arg->print, arg->opt);
 			safe_snprintf(session, "</%s>", arg->name[0]);
 			break;
+		case IPSET_LIST_JSON:
+			if (arg->has_arg == IPSET_NO_ARG) {
+				safe_snprintf(session,
+					      "      \"%s\" : true,\n", arg->name[0]);
+				break;
+			}
+			if (arg->opt == IPSET_OPT_FAMILY) {
+				safe_snprintf(session, "      \"%s\" : \"", arg->name[0]);
+				safe_dprintf(session, arg->print, arg->opt);
+				safe_snprintf(session, "\",\n", arg->name[0]);
+				break;
+			}
+			safe_snprintf(session, "      \"%s\" : ", arg->name[0]);
+			safe_dprintf(session, arg->print, arg->opt);
+			safe_snprintf(session, ",\n", arg->name[0]);
+			break;
 		default:
 			break;
 		}
@@ -1078,6 +1129,21 @@ list_create(struct ipset_session *session, struct nlattr *nla[])
 			session->envopts & IPSET_ENV_LIST_HEADER ?
 			"</header>\n" :
 			"</header>\n<members>\n");
+		break;
+	case IPSET_LIST_JSON:
+		safe_snprintf(session, "      \"memsize\" : ");
+		safe_dprintf(session, ipset_print_number, IPSET_OPT_MEMSIZE);
+		safe_snprintf(session, ",\n      \"references\" : ");
+		safe_dprintf(session, ipset_print_number, IPSET_OPT_REFERENCES);
+		if (ipset_data_test(data, IPSET_OPT_ELEMENTS)) {
+			safe_snprintf(session, ",\n      \"numentries\" : ");
+			safe_dprintf(session, ipset_print_number, IPSET_OPT_ELEMENTS);
+		}
+		safe_snprintf(session, "\n");
+		safe_snprintf(session,
+			session->envopts & IPSET_ENV_LIST_HEADER ?
+			"    },\n" :
+			"    },\n    \"members\" : [");
 		break;
 	default:
 		break;
@@ -1214,11 +1280,24 @@ print_set_done(struct ipset_session *session, bool callback_done)
 		if (session->saved_setname[0] != '\0')
 			safe_snprintf(session, "</members>\n</ipset>\n");
 		break;
+	case IPSET_LIST_JSON:
+		if (session->envopts & IPSET_ENV_LIST_SETNAME)
+			break;
+		if (session->envopts & IPSET_ENV_LIST_HEADER) {
+			if (session->saved_setname[0] != '\0')
+				safe_snprintf(session, "    }");
+			break;
+		}
+		if (session->saved_setname[0] != '\0')
+			safe_snprintf(session, "\n    ]\n  }");
+		break;
 	default:
 		break;
 	}
 	if (callback_done && session->mode == IPSET_LIST_XML)
 		safe_snprintf(session, "</ipsets>\n");
+	if (callback_done && session->mode == IPSET_LIST_JSON)
+		safe_snprintf(session, "\n]\n");
 	return call_outfn(session) ? MNL_CB_ERROR : MNL_CB_STOP;
 }
 
@@ -1244,6 +1323,9 @@ callback_list(struct ipset_session *session, struct nlattr *nla[],
 	    session->mode != IPSET_LIST_SAVE) {
 		if (session->mode == IPSET_LIST_XML)
 			safe_snprintf(session, "<ipset name=\"%s\"/>\n",
+				      ipset_data_setname(data));
+		if (session->mode == IPSET_LIST_JSON)
+			safe_snprintf(session, "\"name\" : \"%s\"\n",
 				      ipset_data_setname(data));
 		else
 			safe_snprintf(session, "%s\n",
@@ -2207,6 +2289,11 @@ ipset_cmd(struct ipset_session *session, enum ipset_cmd cmd, uint32_t lineno)
 	if ((cmd == IPSET_CMD_LIST || cmd == IPSET_CMD_SAVE) &&
 	    session->mode == IPSET_LIST_XML)
 		safe_snprintf(session, "<ipsets>\n");
+
+	/* Start the root element in json mode */
+	if ((cmd == IPSET_CMD_LIST || cmd == IPSET_CMD_SAVE) &&
+	    session->mode == IPSET_LIST_JSON)
+		safe_snprintf(session, "[\n");
 
 	D("next: build_msg");
 	/* Build new message or append buffered commands */

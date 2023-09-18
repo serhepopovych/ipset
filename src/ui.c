@@ -180,7 +180,7 @@ const struct ipset_envopts ipset_envopts[] = {
 	{ .name = { "-o", "-output" },
 	  .has_arg = IPSET_MANDATORY_ARG,	.flag = IPSET_OPT_MAX,
 	  .parse = ipset_parse_output,
-	  .help = "plain|save|xml\n"
+	  .help = "plain|save|xml|json\n"
 		  "       Specify output mode for listing sets.\n"
 		  "       Default value for \"list\" command is mode \"plain\"\n"
 		  "       and for \"save\" command is mode \"save\".",
