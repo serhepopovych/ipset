@@ -52,6 +52,7 @@
 #@HAVE_TYPEDEF_SCTP_SCTPHDR_T@ HAVE_TYPEDEF_SCTP_SCTPHDR_T
 #@HAVE_TIMER_SETUP@ HAVE_TIMER_SETUP
 #@HAVE_STRSCPY@ HAVE_STRSCPY
+#@HAVE_STRSCPY_PAD@ HAVE_STRSCPY_PAD
 #@HAVE_SYNCHRONIZE_RCU_BH@ HAVE_SYNCHRONIZE_RCU_BH
 #@HAVE_LOCKDEP_NFNL_IS_HELD@ HAVE_LOCKDEP_NFNL_IS_HELD
 #@HAVE_COND_RESCHED_RCU@ HAVE_COND_RESCHED_RCU
@@ -511,6 +512,21 @@ static inline ssize_t strscpy(char * dest, const char * src, size_t count)
 	size_t ret = strlcpy(dest, src, count);
 
 	return (ret >= count ? -E2BIG : ret);
+}
+#endif
+
+#ifndef HAVE_STRSCPY_PAD
+static inline ssize_t strscpy_pad(char *dest, const char *src, size_t count)
+{
+	ssize_t written;
+
+	written = strscpy(dest, src, count);
+	if (written < 0 || written == count - 1)
+		return written;
+
+	memset(dest + written + 1, 0, count - written - 1);
+
+	return written;
 }
 #endif
 

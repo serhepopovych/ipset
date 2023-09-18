@@ -754,6 +754,16 @@ else
 	AC_SUBST(HAVE_STRSCPY, undef)
 fi
 
+AC_MSG_CHECKING([kernel source for strscpy_pad() in string.h])
+if test -f $ksourcedir/include/linux/timer.h && \
+   $GREP -q ' strscpy_pad' $ksourcedir/include/linux/string.h; then
+	AC_MSG_RESULT(yes)
+	AC_SUBST(HAVE_STRSCPY_PAD, define)
+else
+	AC_MSG_RESULT(no)
+	AC_SUBST(HAVE_STRSCPY, undef)
+fi
+
 AC_MSG_CHECKING([kernel source for synchronize_rcu_bh() in rcutiny.h and rcupdate.h])
 if test -f $ksourcedir/include/linux/rcupdate.h && \
    $GREP -q 'static inline void synchronize_rcu_bh' \
