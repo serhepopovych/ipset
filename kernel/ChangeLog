@@ -1,3 +1,18 @@
+7.18
+  - netfilter: ipset: Fix race between IPSET_CMD_CREATE and IPSET_CMD_SWAP
+    (reported by Kyle Zeng)
+  - netfilter: ipset: add the missing IP_SET_HASH_WITH_NET0 macro for
+    ip_set_hash_netportnet.c (Kyle Zeng)
+  - compatibility: handle strscpy_pad()
+  - netfilter: ipset: refactor deprecated strncpy (Justin Stitt)
+  - netfilter: ipset: remove rcu_read_lock_bh pair from ip_set_test
+    (Florian Westphal)
+  - netfilter: ipset: Replace strlcpy with strscpy (Azeem Shaikh)
+  - netfilter: ipset: Add schedule point in call_ad(). (Kuniyuki Iwashima)
+  - net: Kconfig: fix spellos (Randy Dunlap)
+  - netfilter: ipset: Fix overflow before widen in the bitmap_ip_create()
+    function. (Gavrilov Ilia)
+
 7.17
   - netfilter: ipset: Rework long task execution when adding/deleting entries
   - netfilter: ipset: fix hash:net,port,net hang with /0 subnet

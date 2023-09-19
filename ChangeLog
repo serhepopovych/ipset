@@ -1,3 +1,15 @@
+7.18
+  - Add json output to list command (Thomas Oberhammer)
+  - tests: hash:ip,port.t: Replace VRRP by GRE protocol (Phil Sutter)
+  - tests: hash:ip,port.t: 'vrrp' is printed as 'carp' (Phil Sutter)
+  - tests: cidr.sh: Add ipcalc fallback (Phil Sutter)
+  - tests: xlate: Make test input valid (Phil Sutter)
+  - tests: xlate: Test built binary by default (Phil Sutter)
+  - xlate: Drop dead code (Phil Sutter)
+  - xlate: Fix for fd leak in error path (Phil Sutter)
+  - configure.ac: fix bashisms (Sam James)
+  - lib/Makefile.am: fix pkgconfig dir (Sam James)
+
 7.17
   - Tests: When verifying comments/timeouts, make sure entries don't expire
   - Tests: Make sure the internal batches add the correct number of elements
