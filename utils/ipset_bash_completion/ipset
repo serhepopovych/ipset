@@ -362,7 +362,7 @@ _ipset_get_ifnames() {
 while read -r; do
     REPLY="${REPLY#*: }"
     printf "%s\n" ${REPLY%%:*}
-done < <(PATH=${PATH}:/sbin ( command ip -o link show ) 2>/dev/null)
+done < <(( PATH=${PATH}:/sbin command ip -o link show ) 2>/dev/null)
 }
 
 _ipset_get_iplist() {
