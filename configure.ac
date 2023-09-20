@@ -14,6 +14,7 @@ LT_CONFIG_LTDL_DIR([libltdl])
 LTDL_INIT([nonrecursive])
 
 PKG_PROG_PKG_CONFIG
+PKG_INSTALLDIR
 
 dnl Shortcut: Linux supported alone
 case "$host" in
