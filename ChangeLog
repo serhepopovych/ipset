@@ -1,3 +1,6 @@
+7.19
+  - build: Fix the double-prefix in pkgconfig (Sam James)
+
 7.18
   - Add json output to list command (Thomas Oberhammer)
   - tests: hash:ip,port.t: Replace VRRP by GRE protocol (Phil Sutter)
