@@ -6,7 +6,7 @@ while [ -n "$1" ]; do
     	    comment=" comment"
     	    ;;
     	timeout)
-    	    timeout=" timeout 10"
+    	    timeout=" timeout 60"
     	    ;;
     	*)
     	    ;;
