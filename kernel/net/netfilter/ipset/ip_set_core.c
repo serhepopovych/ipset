@@ -1225,9 +1225,6 @@ IPSET_CBFN(ip_set_destroy, struct net *net, struct sock *ctnl,
 	if (unlikely(protocol_min_failed(attr)))
 		return -IPSET_ERR_PROTOCOL;
 
-	/* Make sure all readers of the old set pointers are completed. */
-	synchronize_rcu();
-
 	/* Must wait for flush to be really finished in list:set */
 	rcu_barrier();
 
@@ -1440,6 +1437,9 @@ IPSET_CBFN(ip_set_swap, struct net *net, struct sock *ctnl,
 	ip_set(inst, from_id) = to;
 	ip_set(inst, to_id) = from;
 	write_unlock_bh(&ip_set_ref_lock);
+
+	/* Make sure all readers of the old set pointers are completed. */
+	synchronize_rcu();
 
 	return 0;
 }
