@@ -62,6 +62,8 @@ MODULE_ALIAS_NFNL_SUBSYS(NFNL_SUBSYS_IPSET);
 	ip_set_dereference((inst)->ip_set_list)[id]
 #define ip_set_ref_netlink(inst,id)	\
 	rcu_dereference_raw((inst)->ip_set_list)[id]
+#define ip_set_dereference_nfnl(p)	\
+	rcu_dereference_check(p, lockdep_nfnl_is_held(NFNL_SUBSYS_IPSET))
 
 /* The set types are implemented in modules and registered set types
  * can be found in ip_set_type_list. Adding/deleting types is
@@ -709,20 +711,10 @@ __ip_set_put_netlink(struct ip_set *set)
 static struct ip_set *
 ip_set_rcu_get(struct net *net, ip_set_id_t index)
 {
-	struct ip_set *set;
 	struct ip_set_net *inst = ip_set_pernet(net);
 
-	rcu_read_lock();
 	/* ip_set_list and the set pointer need to be protected */
-	set = rcu_dereference(inst->ip_set_list)[index];
-
-	return set;
-}
-
-static inline void
-ip_set_rcu_put(struct ip_set *set __always_unused)
-{
-	rcu_read_unlock();
+	return ip_set_dereference_nfnl(inst->ip_set_list)[index];
 }
 
 static inline void
@@ -750,10 +742,8 @@ ip_set_test(ip_set_id_t index, const struct sk_buff *skb,
 	pr_debug("set %s, index %u\n", set->name, index);
 
 	if (opt->dim < set->type->dimension ||
-	    !(opt->family == set->family || set->family == NFPROTO_UNSPEC)) {
-		ip_set_rcu_put(set);
+	    !(opt->family == set->family || set->family == NFPROTO_UNSPEC))
 		return 0;
-	}
 
 	ret = set->variant->kadt(set, skb, par, IPSET_TEST, opt);
 
@@ -772,7 +762,6 @@ ip_set_test(ip_set_id_t index, const struct sk_buff *skb,
 			ret = -ret;
 	}
 
-	ip_set_rcu_put(set);
 	/* Convert error codes to nomatch */
 	return (ret < 0 ? 0 : ret);
 }
@@ -789,15 +778,12 @@ ip_set_add(ip_set_id_t index, const struct sk_buff *skb,
 	pr_debug("set %s, index %u\n", set->name, index);
 
 	if (opt->dim < set->type->dimension ||
-	    !(opt->family == set->family || set->family == NFPROTO_UNSPEC)) {
-		ip_set_rcu_put(set);
+	    !(opt->family == set->family || set->family == NFPROTO_UNSPEC))
 		return -IPSET_ERR_TYPE_MISMATCH;
-	}
 
 	ip_set_lock(set);
 	ret = set->variant->kadt(set, skb, par, IPSET_ADD, opt);
 	ip_set_unlock(set);
-	ip_set_rcu_put(set);
 
 	return ret;
 }
@@ -814,15 +800,12 @@ ip_set_del(ip_set_id_t index, const struct sk_buff *skb,
 	pr_debug("set %s, index %u\n", set->name, index);
 
 	if (opt->dim < set->type->dimension ||
-	    !(opt->family == set->family || set->family == NFPROTO_UNSPEC)) {
-		ip_set_rcu_put(set);
+	    !(opt->family == set->family || set->family == NFPROTO_UNSPEC))
 		return -IPSET_ERR_TYPE_MISMATCH;
-	}
 
 	ip_set_lock(set);
 	ret = set->variant->kadt(set, skb, par, IPSET_DEL, opt);
 	ip_set_unlock(set);
-	ip_set_rcu_put(set);
 
 	return ret;
 }
@@ -897,7 +880,6 @@ ip_set_name_byindex(struct net *net, ip_set_id_t index, char *name)
 	read_lock_bh(&ip_set_ref_lock);
 	strscpy_pad(name, set->name, IPSET_MAXNAMELEN);
 	read_unlock_bh(&ip_set_ref_lock);
-	ip_set_rcu_put(set);
 }
 EXPORT_SYMBOL_GPL(ip_set_name_byindex);
 
