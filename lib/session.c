@@ -1306,6 +1306,7 @@ callback_list(struct ipset_session *session, struct nlattr *nla[],
 	      enum ipset_cmd cmd)
 {
 	struct ipset_data *data = session->data;
+	static bool firstipset = true;
 
 	if (setjmp(printf_failure)) {
 		session->saved_setname[0] = '\0';
@@ -1324,10 +1325,13 @@ callback_list(struct ipset_session *session, struct nlattr *nla[],
 		if (session->mode == IPSET_LIST_XML)
 			safe_snprintf(session, "<ipset name=\"%s\"/>\n",
 				      ipset_data_setname(data));
-		if (session->mode == IPSET_LIST_JSON)
-			safe_snprintf(session, "\"name\" : \"%s\"\n",
+		else if (session->mode == IPSET_LIST_JSON) {
+			if (!firstipset)
+				safe_snprintf(session, ",\n");
+			firstipset = false;
+			safe_snprintf(session, "  { \"name\" : \"%s\" }",
 				      ipset_data_setname(data));
-		else
+		} else
 			safe_snprintf(session, "%s\n",
 				      ipset_data_setname(data));
 		return call_outfn(session) ? MNL_CB_ERROR : MNL_CB_OK;
