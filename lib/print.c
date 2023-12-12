@@ -411,10 +411,11 @@ ipset_print_number(char *buf, unsigned int len,
 int
 ipset_print_hexnumber(char *buf, unsigned int len,
 		      const struct ipset_data *data, enum ipset_opt opt,
-		      uint8_t env UNUSED)
+		      uint8_t env)
 {
 	size_t maxsize;
 	const void *number;
+	const char *quoted = env & IPSET_ENV_QUOTED ? "\"" : "";
 
 	assert(buf);
 	assert(len > 0);
@@ -424,17 +425,17 @@ ipset_print_hexnumber(char *buf, unsigned int len,
 	maxsize = ipset_data_sizeof(opt, AF_INET);
 	D("opt: %u, maxsize %zu", opt, maxsize);
 	if (maxsize == sizeof(uint8_t))
-		return snprintf(buf, len, "0x%02"PRIx8,
-				*(const uint8_t *) number);
+		return snprintf(buf, len, "%s0x%02"PRIx8"%s",
+				quoted, *(const uint8_t *) number, quoted);
 	else if (maxsize == sizeof(uint16_t))
-		return snprintf(buf, len, "0x%04"PRIx16,
-				*(const uint16_t *) number);
+		return snprintf(buf, len, "%s0x%04"PRIx16"%s",
+				quoted, *(const uint16_t *) number, quoted);
 	else if (maxsize == sizeof(uint32_t))
-		return snprintf(buf, len, "0x%08"PRIx32,
-				*(const uint32_t *) number);
+		return snprintf(buf, len, "%s0x%08"PRIx32"%s",
+				quoted, *(const uint32_t *) number, quoted);
 	else if (maxsize == sizeof(uint64_t))
-		return snprintf(buf, len, "0x%016"PRIx64,
-				*(const uint64_t *) number);
+		return snprintf(buf, len, "%s0x%016"PRIx64"%s",
+				quoted, *(const uint64_t *) number, quoted);
 	else
 		assert(0);
 	return 0;

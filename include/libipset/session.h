@@ -84,6 +84,8 @@ enum ipset_envopt {
 	IPSET_ENV_LIST_SETNAME	= (1 << IPSET_ENV_BIT_LIST_SETNAME),
 	IPSET_ENV_BIT_LIST_HEADER = 5,
 	IPSET_ENV_LIST_HEADER	= (1 << IPSET_ENV_BIT_LIST_HEADER),
+	IPSET_ENV_BIT_QUOTED 	= 6,
+	IPSET_ENV_QUOTED	= (1 << IPSET_ENV_BIT_QUOTED),
 };
 
 extern bool ipset_envopt_test(struct ipset_session *session,
