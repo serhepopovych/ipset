@@ -362,7 +362,7 @@ _ipset_get_ifnames() {
 while read -r; do
     REPLY="${REPLY#*: }"
     printf "%s\n" ${REPLY%%:*}
-done < <(( PATH=${PATH}:/sbin command ip -o link show ) 2>/dev/null)
+done < <(PATH=${PATH}:/sbin ( command ip -o link show ) 2>/dev/null)
 }
 
 _ipset_get_iplist() {
@@ -1130,9 +1130,9 @@ if [[ $prev = @(-o|-output) ]]; then
     # make sure it's not a filename named -o or -output
     if [[ $str_filename != $prev ]]; then
         if ((names_only || headers_only)); then
-            COMPREPLY=( $( compgen -W 'plain xml json' -- "$cur" ) )
+            COMPREPLY=( $( compgen -W 'plain xml' -- "$cur" ) )
         else
-            COMPREPLY=( $( compgen -W 'plain save xml json' -- "$cur" ) )
+            COMPREPLY=( $( compgen -W 'plain save xml' -- "$cur" ) )
         fi
         return 0
     fi
