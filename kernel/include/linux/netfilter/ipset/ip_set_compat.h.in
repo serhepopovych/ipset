@@ -51,6 +51,7 @@
 #@HAVE_PASSING_EXTENDED_ACK_TO_CALLBACKS@ HAVE_PASSING_EXTENDED_ACK_TO_CALLBACKS
 #@HAVE_TYPEDEF_SCTP_SCTPHDR_T@ HAVE_TYPEDEF_SCTP_SCTPHDR_T
 #@HAVE_TIMER_SETUP@ HAVE_TIMER_SETUP
+#@HAVE_TIMER_SHUTDOWN_SYNC@ HAVE_TIMER_SHUTDOWN_SYNC
 #@HAVE_STRSCPY@ HAVE_STRSCPY
 #@HAVE_STRSCPY_PAD@ HAVE_STRSCPY_PAD
 #@HAVE_SYNCHRONIZE_RCU_BH@ HAVE_SYNCHRONIZE_RCU_BH
@@ -504,6 +505,10 @@ static inline struct nlmsghdr *nfnl_msg_put(struct sk_buff *skb, u32 portid,
 #define INIT_GC_VARS(type, var)				\
 	struct ip_set *set = (struct ip_set *)ul_set;	\
 	struct type *var = set->data
+#endif
+
+#ifndef HAVE_TIMER_SHUTDOWN_SYNC
+#define timer_shutdown_sync(timer)	del_timer_sync(timer)
 #endif
 
 #ifndef HAVE_STRSCPY
