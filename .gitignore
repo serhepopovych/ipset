@@ -16,6 +16,8 @@ Makefile.in
 *.mod.o.cmd
 *.mod.cmd
 *.mod
+*.order.cmd
+*.symvers.cmd
 .tmp_versions
 Module.symvers
 modules.order
