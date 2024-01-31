@@ -1,3 +1,15 @@
+7.20
+  - treewide: Convert del_timer*() to timer_shutdown*() (Steven Rostedt)
+  - Use timer_shutdown_sync() when available, instead of del_timer_sync()
+  - netfilter: ipset: fix race condition between swap/destroy and kernel
+    side add/del/test v4
+  - netfilter: ipset: fix race condition between swap/destroy and kernel
+    side add/del/test v3
+  - netfilter: ipset: fix race condition between swap/destroy and kernel
+    side add/del/test v2
+  - netfilter: ipset: fix race condition between swap/destroy and kernel
+    side add/del/test
+
 7.18
   - netfilter: ipset: Fix race between IPSET_CMD_CREATE and IPSET_CMD_SWAP
     (reported by Kyle Zeng)

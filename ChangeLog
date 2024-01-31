@@ -1,3 +1,10 @@
+7.20
+  - Ignore *.order.cmd and *.symvers.cmd files in kernel builds
+  - Bash completion utility updated
+  - Fix json output for -name option (Mark)
+  - Fix hex literals in json output
+  - tests: increase timeout to cope with slow virtual test machine
+
 7.19
   - build: Fix the double-prefix in pkgconfig (Sam James)
 
