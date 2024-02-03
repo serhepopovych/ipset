@@ -1086,12 +1086,12 @@ list_create(struct ipset_session *session, struct nlattr *nla[])
 			if (arg->opt == IPSET_OPT_FAMILY) {
 				safe_snprintf(session, "      \"%s\" : \"", arg->name[0]);
 				safe_dprintf(session, arg->print, arg->opt);
-				safe_snprintf(session, "\",\n", arg->name[0]);
+				safe_snprintf(session, "\",\n");
 				break;
 			}
 			safe_snprintf(session, "      \"%s\" : ", arg->name[0]);
 			safe_dprintf(session, arg->print, arg->opt);
-			safe_snprintf(session, ",\n", arg->name[0]);
+			safe_snprintf(session, ",\n");
 			break;
 		default:
 			break;
