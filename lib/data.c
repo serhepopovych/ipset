@@ -111,7 +111,7 @@ ipset_strlcpy(char *dst, const char *src, size_t len)
 	assert(dst);
 	assert(src);
 
-	strncpy(dst, src, len);
+	memcpy(dst, src, len);
 	dst[len - 1] = '\0';
 }
 
