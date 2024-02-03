@@ -2284,7 +2284,8 @@ ipset_cmd(struct ipset_session *session, enum ipset_cmd cmd, uint32_t lineno)
 	if (cmd == IPSET_CMD_LIST || cmd == IPSET_CMD_SAVE) {
 		/* Set default output mode */
 		if (session->mode == IPSET_LIST_NONE)
-			session->mode = IPSET_LIST_PLAIN;
+			session->mode = cmd == IPSET_CMD_LIST ?
+				IPSET_LIST_PLAIN : IPSET_LIST_SAVE;
 		/* Reset just in case there are multiple modes in a session */
 		ipset_envopt_unset(session, IPSET_ENV_QUOTED);
 		switch (session->mode) {
