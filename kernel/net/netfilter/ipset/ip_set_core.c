@@ -30,7 +30,6 @@ static DEFINE_RWLOCK(ip_set_ref_lock);		/* protects the set refs */
 struct ip_set_net {
 	struct ip_set * __rcu *ip_set_list;	/* all individual sets */
 	ip_set_id_t	ip_set_max;	/* max number of sets */
-	bool		is_deleted;	/* deleted by ip_set_net_exit */
 	bool		is_destroyed;	/* all sets are destroyed */
 };
 
@@ -926,11 +925,9 @@ ip_set_nfnl_put(struct net *net, ip_set_id_t index)
 	struct ip_set_net *inst = ip_set_pernet(net);
 
 	nfnl_lock(NFNL_SUBSYS_IPSET);
-	if (!inst->is_deleted) { /* already deleted from ip_set_net_exit() */
-		set = ip_set(inst, index);
-		if (set)
-			__ip_set_put(set);
-	}
+	set = ip_set(inst, index);
+	if (set)
+		__ip_set_put(set);
 	nfnl_unlock(NFNL_SUBSYS_IPSET);
 }
 EXPORT_SYMBOL_GPL(ip_set_nfnl_put);
@@ -2484,7 +2481,6 @@ ip_set_net_init(struct net *net)
 #else
 		goto err_alloc;
 #endif
-	inst->is_deleted = false;
 	inst->is_destroyed = false;
 	rcu_assign_pointer(inst->ip_set_list, list);
 	return 0;
@@ -2501,20 +2497,6 @@ ip_set_net_exit(struct net *net)
 {
 	struct ip_set_net *inst = ip_set_pernet(net);
 
-	struct ip_set *set = NULL;
-	ip_set_id_t i;
-
-	inst->is_deleted = true; /* flag for ip_set_nfnl_put */
-
-	nfnl_lock(NFNL_SUBSYS_IPSET);
-	for (i = 0; i < inst->ip_set_max; i++) {
-		set = ip_set(inst, i);
-		if (set) {
-			ip_set(inst, i) = NULL;
-			ip_set_destroy_set(set);
-		}
-	}
-	nfnl_unlock(NFNL_SUBSYS_IPSET);
 	kvfree(rcu_dereference_protected(inst->ip_set_list, 1));
 #ifndef HAVE_NET_OPS_ID
 	kvfree(inst);
@@ -2580,9 +2562,6 @@ ip_set_fini(void)
 	nf_unregister_sockopt(&so_set);
 	nfnetlink_subsys_unregister(&ip_set_netlink_subsys);
 	UNREGISTER_PERNET_SUBSYS(&ip_set_net_ops);
-
-	/* Wait for call_rcu() in destroy */
-	rcu_barrier();
 
 	pr_debug("these are the famous last words\n");
 }
