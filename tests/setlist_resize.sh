@@ -12,7 +12,7 @@ for x in ip_set_list_set ip_set_hash_netiface ip_set_hash_ipportnet \
 	 ip_set_hash_netportnet ip_set_hash_ipmark ip_set_hash_mac \
 	 ip_set_bitmap_port ip_set_bitmap_ipmac \
 	 ip_set_bitmap_ip xt_set ip_set; do
-    rmmod $x
+    rmmod $x >/dev/null 2>&1
 done
 
 create() {
@@ -31,6 +31,6 @@ for x in `seq 1 $loop`; do
     test `$ipset l -n | wc -l` -eq 1024 || exit 1
     $ipset x
     test `lsmod|grep -w ^ip_set_hash_ip | awk '{print $3}'` -eq 0 || exit 1
-    rmmod ip_set_hash_ip
-    rmmod ip_set
+    rmmod ip_set_hash_ip >/dev/null 2>&1
+    rmmod ip_set >/dev/null 2>&1
 done
