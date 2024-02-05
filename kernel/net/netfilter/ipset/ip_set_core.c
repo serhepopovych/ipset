@@ -1182,23 +1182,48 @@ ip_set_setname_policy[IPSET_ATTR_CMD_MAX + 1] = {
 				    .len = IPSET_MAXNAMELEN - 1 },
 };
 
-static void
-ip_set_destroy_set(struct ip_set *set)
-{
-	pr_debug("set: %s\n",  set->name);
+/* Destroying a set is split into two stages when a DESTROY command issued:
+ * - Cancel garbage collectors and decrement the module reference counter:
+ *	- Cancelling may wait and we are allowed to do it at this stage.
+ *	- Module remove is protected by rcu_barrier() which waits for
+ *	  the second stage to be finished.
+ * - In order to prevent the race between kernel side add/del/test element
+ *   operations and destroy, the destroying of the set data areas are
+ *   performed via a call_rcu() call.
+ */
 
+/* Call set variant specific destroy function and reclaim the set data. */
+static void
+ip_set_destroy_set_variant(struct ip_set *set)
+{
 	/* Must call it without holding any lock */
 	set->variant->destroy(set);
-	module_put(set->type->me);
 	kfree(set);
 }
 
 static void
-ip_set_destroy_set_rcu(struct rcu_head *head)
+ip_set_destroy_set_variant_rcu(struct rcu_head *head)
 {
 	struct ip_set *set = container_of(head, struct ip_set, rcu);
 
-	ip_set_destroy_set(set);
+	ip_set_destroy_set_variant(set);
+}
+
+/* Cancel the garbage collectors and decrement module references */
+static void
+ip_set_destroy_cancel_gc(struct ip_set *set)
+{
+	set->variant->cancel_gc(set);
+	module_put(set->type->me);
+}
+
+/* Use when we may wait for the complete destroy to be finished.
+ */
+static void
+ip_set_destroy_set(struct ip_set *set)
+{
+	ip_set_destroy_cancel_gc(set);
+	ip_set_destroy_set_variant(set);
 }
 
 static int
@@ -1243,8 +1268,6 @@ IPSET_CBFN(ip_set_destroy, struct net *net, struct sock *ctnl,
 			s = ip_set(inst, i);
 			if (s) {
 				ip_set(inst, i) = NULL;
-				/* Must cancel garbage collectors */
-				s->variant->cancel_gc(s);
 				ip_set_destroy_set(s);
 			}
 		}
@@ -1273,8 +1296,8 @@ IPSET_CBFN(ip_set_destroy, struct net *net, struct sock *ctnl,
 			rcu_barrier();
 		}
 		/* Must cancel garbage collectors */
-		s->variant->cancel_gc(s);
-		call_rcu(&s->rcu, ip_set_destroy_set_rcu);
+		ip_set_destroy_cancel_gc(s);
+		call_rcu(&s->rcu, ip_set_destroy_set_variant_rcu);
 	}
 	return 0;
 out:
@@ -2488,7 +2511,6 @@ ip_set_net_exit(struct net *net)
 		set = ip_set(inst, i);
 		if (set) {
 			ip_set(inst, i) = NULL;
-			set->variant->cancel_gc(set);
 			ip_set_destroy_set(set);
 		}
 	}
