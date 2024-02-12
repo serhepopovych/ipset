@@ -1,3 +1,8 @@
+7.21
+  - The patch "Fix hex literals in json output" broke save mode, restore it
+  - Fix -Werror=format-extra-args warning
+  - Workaround misleading -Wstringop-truncation warning
+
 7.20
   - Ignore *.order.cmd and *.symvers.cmd files in kernel builds
   - Bash completion utility updated

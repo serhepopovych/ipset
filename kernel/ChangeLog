@@ -1,3 +1,11 @@
+7.21
+  - netfilter: ipset: Suppress false sparse warnings
+  - tests: Verify module unload when sets with timeout were just destroyed
+  - netfilter: ipset: remove set destroy at ip_set module removal
+  - netfilter: ipset: Cleanup the code of destroy operation and explain
+    the two stages in comments
+  - netfilter: ipset: Missing gc cancellations fixed
+
 7.20
   - treewide: Convert del_timer*() to timer_shutdown*() (Steven Rostedt)
   - Use timer_shutdown_sync() when available, instead of del_timer_sync()
